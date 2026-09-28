@@ -104,6 +104,7 @@
     return (
       '<div class="sidebar-heading">Lessons</div>' +
       '<div class="sidebar-progress">' +
+      '<div class="sidebar-progress-heading">Progress</div>' +
       '<div class="sidebar-progress-track"><div class="sidebar-progress-fill" style="width:' +
       pct +
       '%"></div></div>' +
