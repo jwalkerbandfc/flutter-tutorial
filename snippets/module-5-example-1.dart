@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 void main() {
   runApp(const GameMenuApp());
@@ -122,20 +123,12 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen>
     with SingleTickerProviderStateMixin {
-  static const double gameWidth = 360;
-  static const double gameHeight = 520;
-  static const double gravity = 0.6;
-
   late final Ticker _ticker;
-  late Player _player;
-  double _velocityY = 0;
-
-  GameSession get _session => widget.session;
+  Duration _elapsed = Duration.zero;
 
   @override
   void initState() {
     super.initState();
-    _player = Player(x: 40, y: 0);
     _ticker = createTicker(_onTick)..start();
   }
 
@@ -146,18 +139,9 @@ class _GameScreenState extends State<GameScreen>
   }
 
   void _onTick(Duration elapsed) {
-    setState(_updatePhysics);
-  }
-
-  void _updatePhysics() {
-    _velocityY += gravity;
-    _player.y += _velocityY;
-
-    final groundY = gameHeight - _player.size;
-    if (_player.y > groundY) {
-      _player.y = groundY;
-      _velocityY = 0;
-    }
+    setState(() {
+      _elapsed = elapsed;
+    });
   }
 
   @override
@@ -165,68 +149,10 @@ class _GameScreenState extends State<GameScreen>
     return Scaffold(
       appBar: AppBar(title: const Text('Game')),
       body: Center(
-        child: SizedBox(
-          width: gameWidth,
-          height: gameHeight,
-          child: ClipRect(
-            child: Stack(
-              children: [
-                const GameBackground(),
-                _player.build(),
-              ],
-            ),
-          ),
+        child: Text(
+          'Running for ${_elapsed.inSeconds}s',
+          style: const TextStyle(fontSize: 28),
         ),
-      ),
-    );
-  }
-}
-
-/// The player character — an entity with a position and a way to draw itself.
-class Player {
-  double x;
-  double y;
-  final double size;
-
-  Player({required this.x, required this.y, this.size = 50});
-
-  Widget build() {
-    return Positioned(
-      left: x,
-      top: y,
-      child: CustomPaint(
-        size: Size(size, size),
-        painter: _PlayerPainter(),
-      ),
-    );
-  }
-}
-
-class _PlayerPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final body = Paint()..color = Colors.orange;
-    canvas.drawOval(Rect.fromLTWH(0, 0, size.width, size.height), body);
-
-    final eye = Paint()..color = Colors.black;
-    canvas.drawCircle(Offset(size.width * 0.68, size.height * 0.35), 4, eye);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// The scrolling backdrop. DartPad can't read local asset files, so we load
-/// artwork from a hosted URL instead.
-class GameBackground extends StatelessWidget {
-  const GameBackground({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: Image.network(
-        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-        fit: BoxFit.cover,
       ),
     );
   }
