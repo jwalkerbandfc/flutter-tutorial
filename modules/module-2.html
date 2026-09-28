@@ -6,88 +6,92 @@
   <title>Module 2: The Basics — Flutter Game Tutorial</title>
   <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
-<body>
-  <header class="site-header">
-    <a href="../index.html">Flutter Game Tutorial</a>
-  </header>
+<body data-root="../" data-lesson="module-2">
+  <div class="app">
+    <header class="app-header" id="app-header-root"></header>
+    <div class="app-body">
+      <aside class="sidebar" id="sidebar-root"></aside>
+      <main class="content">
+        <div class="lesson-header-row">
+          <div>
+            <span class="module-badge">MODULE 2 OF 5</span>
+            <h1>The Basics</h1>
+          </div>
+          <div class="lesson-tabs">
+            <button class="tab-btn active" id="tab-lesson" type="button">Lesson</button>
+            <button class="tab-btn" id="tab-maindart" type="button">main.dart</button>
+          </div>
+        </div>
 
-  <main>
-    <span class="module-badge">MODULE 2 OF 5</span>
-    <h1>The Basics</h1>
-    <p>
-      In Module 1 you got Flutter installed and glanced at a working app without really
-      unpacking it. Now we slow down. By the end of this module you'll understand exactly what
-      <code>runApp()</code> does, the difference between a widget that never changes and one that
-      does, and how to lay out a real screen — all while building the start menu for the game
-      we're working toward.
-    </p>
+        <div class="content-split">
+          <article class="lesson-pane">
+            <p>
+              In Module 1 you got Flutter installed and glanced at a working app without really
+              unpacking it. Now we slow down. By the end of this module you'll understand exactly what
+              <code>runApp()</code> does, the difference between a widget that never changes and one that
+              does, and how to lay out a real screen — all while building the start menu for the game
+              we're working toward.
+            </p>
 
-    <div class="callout warning">
-      <p>
-        <strong>Setup note (for the course author):</strong> this module has three live DartPad
-        examples. Create a separate Gist for each code block below (Example 1, 2, and 3) and
-        drop each Gist's ID into the matching iframe's <code>id=</code> parameter.
-      </p>
-    </div>
+            <h2>1. runApp() and the Widget Tree</h2>
+            <p>
+              Everything in Flutter is a <strong>widget</strong> — text, buttons, spacing, even the whole
+              screen is a widget. Widgets get nested inside other widgets to build up your app, and that
+              nested structure is called the <strong>widget tree</strong>.
+            </p>
 
-    <h2>1. runApp() and the Widget Tree</h2>
-    <p>
-      Everything in Flutter is a <strong>widget</strong> — text, buttons, spacing, even the whole
-      screen is a widget. Widgets get nested inside other widgets to build up your app, and that
-      nested structure is called the <strong>widget tree</strong>.
-    </p>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> think of a widget tree like the layers of a hamburger. The bun
+                on the outside wraps everything — that's your top-level app widget. Inside that, you've
+                got the lettuce, the patty, the cheese, each one sitting inside the layer before it.
+                Change the patty and the rest of the burger doesn't care — it just wraps around whatever
+                you put there. Widgets work the same way: each one just describes itself and wraps around
+                whatever's passed in as its <code>child</code> (or <code>children</code>).
+              </p>
+            </div>
 
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> think of a widget tree like the layers of a hamburger. The bun
-        on the outside wraps everything — that's your top-level app widget. Inside that, you've
-        got the lettuce, the patty, the cheese, each one sitting inside the layer before it.
-        Change the patty and the rest of the burger doesn't care — it just wraps around whatever
-        you put there. Widgets work the same way: each one just describes itself and wraps around
-        whatever's passed in as its <code>child</code> (or <code>children</code>).
-      </p>
-    </div>
+            <p>
+              <code>runApp()</code> is the very first thing that runs in a Flutter app. It takes one
+              widget — the root of the whole tree — and tells Flutter "draw this, and everything inside
+              it, onto the screen." Every app you build in this course starts with exactly one call to
+              <code>runApp()</code>.
+            </p>
 
-    <p>
-      <code>runApp()</code> is the very first thing that runs in a Flutter app. It takes one
-      widget — the root of the whole tree — and tells Flutter "draw this, and everything inside
-      it, onto the screen." Every app you build in this course starts with exactly one call to
-      <code>runApp()</code>.
-    </p>
+            <h2>2. StatelessWidget: The Printed Photograph</h2>
+            <p>
+              The simplest kind of widget is a <code>StatelessWidget</code>. It has one job: a
+              <code>build()</code> method that describes what it looks like.
+            </p>
 
-    <h2>2. StatelessWidget: The Printed Photograph</h2>
-    <p>
-      The simplest kind of widget is a <code>StatelessWidget</code>. It has one job: a
-      <code>build()</code> method that describes what it looks like.
-    </p>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> a <code>StatelessWidget</code> is like a printed photograph.
+                Once it's printed, it looks exactly the same forever — it doesn't matter what happens in
+                the room around it. If you want a different picture, you have to print a completely new
+                one. That's fine for things that genuinely never change once they're on screen, like a
+                title or a static label.
+              </p>
+            </div>
 
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> a <code>StatelessWidget</code> is like a printed photograph.
-        Once it's printed, it looks exactly the same forever — it doesn't matter what happens in
-        the room around it. If you want a different picture, you have to print a completely new
-        one. That's fine for things that genuinely never change once they're on screen, like a
-        title or a static label.
-      </p>
-    </div>
+            <h3>Example 1: A Game Menu Screen</h3>
+            <p>
+              Let's build the start screen for our game. This uses <code>MaterialApp</code> (which sets
+              up theming and navigation for the whole app) and <code>Scaffold</code> (which gives you the
+              basic page structure — an app bar up top and a body underneath).
+            </p>
 
-    <h3>Example 1: A Game Menu Screen</h3>
-    <p>
-      Let's build the start screen for our game. This uses <code>MaterialApp</code> (which sets
-      up theming and navigation for the whole app) and <code>Scaffold</code> (which gives you the
-      basic page structure — an app bar up top and a body underneath).
-    </p>
-
-    <span class="file-note new">New File</span>
-    <div class="dartpad-embed">
-      <iframe
-        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
-        title="Module 2 Example 1: Game Menu Screen"
-        loading="lazy">
-      </iframe>
-    </div>
-
-    <pre><code>import 'package:flutter/material.dart';
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note new">New File</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-2-example-1.dart"
+                  data-label="Module 2 Example 1: Game Menu Screen"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+              <pre><code>import 'package:flutter/material.dart';
 
 void main() {
   runApp(const GameMenuApp());
@@ -122,52 +126,54 @@ class MenuScreen extends StatelessWidget {
     );
   }
 }</code></pre>
+            </div>
 
-    <p>
-      Notice <code>MenuScreen</code> only has a <code>build()</code> method — no memory, no
-      changing data. It gets built once and just sits there, like our printed photo.
-    </p>
+            <p>
+              Notice <code>MenuScreen</code> only has a <code>build()</code> method — no memory, no
+              changing data. It gets built once and just sits there, like our printed photo.
+            </p>
 
-    <h2>3. Layout Basics: Column, Row, and Container</h2>
-    <p>
-      Right now our menu just centers one line of text. Real screens need proper layout, and
-      Flutter gives you three workhorse widgets for that:
-    </p>
+            <h2>3. Layout Basics: Column, Row, and Container</h2>
+            <p>
+              Right now our menu just centers one line of text. Real screens need proper layout, and
+              Flutter gives you three workhorse widgets for that:
+            </p>
 
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> imagine a bookshelf. A <code>Column</code> stacks its children
-        <em>top to bottom</em>, like books standing upright next to each other on a shelf. A
-        <code>Row</code> lines its children up <em>side by side</em>, like lying those same books
-        flat in a stack. <code>MainAxisAlignment</code> controls spacing <em>along</em> the
-        direction you're stacking (top-to-bottom for a Column); <code>CrossAxisAlignment</code>
-        controls alignment <em>across</em> it.
-      </p>
-    </div>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> imagine a bookshelf. A <code>Column</code> stacks its children
+                <em>top to bottom</em>, like books standing upright next to each other on a shelf. A
+                <code>Row</code> lines its children up <em>side by side</em>, like lying those same books
+                flat in a stack. <code>MainAxisAlignment</code> controls spacing <em>along</em> the
+                direction you're stacking (top-to-bottom for a Column); <code>CrossAxisAlignment</code>
+                controls alignment <em>across</em> it.
+              </p>
+            </div>
 
-    <p>
-      A <code>Container</code> is like a picture frame — you can give it padding (space inside
-      the frame), a background color, and rounded corners, and it wraps around whatever child you
-      put inside it. <code>SizedBox</code> is just an invisible spacer, useful for pushing things
-      apart by an exact amount.
-    </p>
+            <p>
+              A <code>Container</code> is like a picture frame — you can give it padding (space inside
+              the frame), a background color, and rounded corners, and it wraps around whatever child you
+              put inside it. <code>SizedBox</code> is just an invisible spacer, useful for pushing things
+              apart by an exact amount.
+            </p>
 
-    <h3>Example 2: Adding a Stats Bar</h3>
-    <p>
-      Let's replace that single line of text with a proper layout: a welcome message, and a
-      little card underneath showing the player's lives and score.
-    </p>
+            <h3>Example 2: Adding a Stats Bar</h3>
+            <p>
+              Let's replace that single line of text with a proper layout: a welcome message, and a
+              little card underneath showing the player's lives and score.
+            </p>
 
-    <span class="file-note replace">Adds to Example 1 — replaces the body of MenuScreen</span>
-    <div class="dartpad-embed">
-      <iframe
-        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
-        title="Module 2 Example 2: Stats Bar Layout"
-        loading="lazy">
-      </iframe>
-    </div>
-
-    <pre><code>import 'package:flutter/material.dart';
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note replace">Adds to Example 1 — replaces the body of MenuScreen</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-2-example-2.dart"
+                  data-label="Module 2 Example 2: Stats Bar Layout"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+              <pre><code>import 'package:flutter/material.dart';
 
 void main() {
   runApp(const GameMenuApp());
@@ -229,89 +235,171 @@ class MenuScreen extends StatelessWidget {
     );
   }
 }</code></pre>
+            </div>
 
-    <p>
-      We've nested a <code>Row</code> (the lives/score) inside a <code>Container</code> (the
-      card), inside a <code>Column</code> (stacked under the welcome text), inside
-      <code>Padding</code> — a mini widget tree, just like the hamburger from earlier.
-    </p>
+            <p>
+              We've nested a <code>Row</code> (the lives/score) inside a <code>Container</code> (the
+              card), inside a <code>Column</code> (stacked under the welcome text), inside
+              <code>Padding</code> — a mini widget tree, just like the hamburger from earlier.
+            </p>
 
-    <h2>4. StatefulWidget: The Whiteboard</h2>
-    <p>
-      Right now the score is stuck at 0 forever, because it's just text — printed once and never
-      redrawn. To let the player actually score points, we need a widget that can remember
-      changing data and redraw itself when that data changes.
-    </p>
+            <h2>4. StatefulWidget: The Whiteboard</h2>
+            <p>
+              Right now the score is stuck at 0 forever, because it's just text — printed once and never
+              redrawn. To let the player actually score points, we need a widget that can remember
+              changing data and redraw itself when that data changes.
+            </p>
 
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> if a <code>StatelessWidget</code> is a printed photo, a
-        <code>StatefulWidget</code> is a whiteboard. You can rub bits out and write new numbers
-        on it whenever you like, and everyone looking at the whiteboard instantly sees the
-        update. In Flutter, "rubbing out and rewriting" is done by calling a method named
-        <code>setState()</code> — it tells Flutter "some data changed, please redraw."
-      </p>
-    </div>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> if a <code>StatelessWidget</code> is a printed photo, a
+                <code>StatefulWidget</code> is a whiteboard. You can rub bits out and write new numbers
+                on it whenever you like, and everyone looking at the whiteboard instantly sees the
+                update. In Flutter, "rubbing out and rewriting" is done by calling a method named
+                <code>setState()</code> — it tells Flutter "some data changed, please redraw."
+              </p>
+            </div>
 
-    <p>
-      A <code>StatefulWidget</code> is actually two classes working together: the widget itself
-      (which barely does anything) and a matching <code>State</code> class that holds the data
-      and the real <code>build()</code> method. It looks like more boilerplate than
-      <code>StatelessWidget</code>, and it is — but that's the price of being able to change.
-    </p>
+            <p>
+              A <code>StatefulWidget</code> is actually two classes working together: the widget itself
+              (which barely does anything) and a matching <code>State</code> class that holds the data
+              and the real <code>build()</code> method. It looks like more boilerplate than
+              <code>StatelessWidget</code>, and it is — but that's the price of being able to change.
+            </p>
 
-    <div class="callout">
-      <p>
-        <strong>Keep this in mind for later:</strong> every frame of a game is really just
-        <code>setState()</code> being called over and over, each time with slightly updated
-        numbers — a player's position moving a few pixels, gravity pulling them down a little
-        more. Module 5's entire game loop is this exact idea, just running automatically many
-        times a second instead of waiting for a tap.
-      </p>
-    </div>
+            <div class="callout">
+              <p>
+                <strong>Keep this in mind for later:</strong> every frame of a game is really just
+                <code>setState()</code> being called over and over, each time with slightly updated
+                numbers — a player's position moving a few pixels, gravity pulling them down a little
+                more. Module 5's entire game loop is this exact idea, just running automatically many
+                times a second instead of waiting for a tap.
+              </p>
+            </div>
 
-    <h3>Example 3: Making the Score Interactive</h3>
-    <p>
-      Let's turn <code>MenuScreen</code> into a <code>StatefulWidget</code> and add a button that
-      increases the score each time it's tapped.
-    </p>
+            <h3>Example 3: Making the Score Interactive</h3>
+            <p>
+              Let's turn <code>MenuScreen</code> into a <code>StatefulWidget</code> and add a button that
+              increases the score each time it's tapped.
+            </p>
 
-    <span class="file-note replace">Replaces the entire file</span>
-    <div class="dartpad-embed">
-      <iframe
-        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
-        title="Module 2 Example 3: Interactive Score"
-        loading="lazy">
-      </iframe>
-    </div>
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note replace">Replaces the entire file</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-2-example-3.dart"
+                  data-label="Module 2 Example 3: Interactive Score"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+              <pre><code>import 'package:flutter/material.dart';
 
-    <p>
-      The full code is below — this is also the file you'll find in the "Full main.dart" block at
-      the end of this module. A few things changed:
-    </p>
-    <ul>
-      <li><code>MenuScreen</code> now extends <code>StatefulWidget</code> instead of <code>StatelessWidget</code>.</li>
-      <li>A new class, <code>_MenuScreenState</code>, holds the actual score as a variable: <code>int _score = 0;</code></li>
-      <li>An <code>ElevatedButton</code> calls <code>_addPoint()</code> when tapped, which calls <code>setState()</code> to increase the score and redraw.</li>
-    </ul>
+void main() {
+  runApp(const GameMenuApp());
+}
 
-    <h2>Recap</h2>
-    <ul class="checklist">
-      <li>Understood <code>runApp()</code> and the widget tree (the hamburger analogy)</li>
-      <li>Built a <code>StatelessWidget</code> screen with <code>MaterialApp</code> and <code>Scaffold</code></li>
-      <li>Laid out a UI using <code>Column</code>, <code>Row</code>, and <code>Container</code></li>
-      <li>Converted a widget to <code>StatefulWidget</code> and used <code>setState()</code> to make it interactive</li>
-    </ul>
+class GameMenuApp extends StatelessWidget {
+  const GameMenuApp({super.key});
 
-    <p>
-      Next, in <strong>Module 3: Object-Oriented Architecture</strong>, we'll stop cramming
-      everything into one file. You'll learn how to split your Dart code into proper classes,
-      separate your game logic from your UI, and add multi-page navigation — the structure
-      you'll need before we start building actual game entities in Module 4.
-    </p>
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Game Menu',
+      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.indigo),
+      home: const MenuScreen(),
+    );
+  }
+}
 
-    <h2>Full main.dart for This Module</h2>
-    <pre><code>import 'package:flutter/material.dart';
+class MenuScreen extends StatefulWidget {
+  const MenuScreen({super.key});
+
+  @override
+  State<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends State<MenuScreen> {
+  int _score = 0;
+
+  void _addPoint() {
+    setState(() {
+      _score++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Sky Runner')),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text(
+              'Welcome, Player!',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.indigo.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.favorite, color: Colors.red),
+                  const SizedBox(width: 8),
+                  const Text('Lives: 3', style: TextStyle(fontSize: 18)),
+                  const SizedBox(width: 24),
+                  const Icon(Icons.star, color: Colors.amber),
+                  const SizedBox(width: 8),
+                  Text('Score: $_score', style: const TextStyle(fontSize: 18)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: _addPoint,
+              child: const Text('Tap to score a point!'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <p>
+              A few things changed: <code>MenuScreen</code> now extends <code>StatefulWidget</code>
+              instead of <code>StatelessWidget</code>; a new class, <code>_MenuScreenState</code>, holds
+              the actual score as a variable; and an <code>ElevatedButton</code> calls
+              <code>_addPoint()</code> when tapped, which calls <code>setState()</code> to increase the
+              score and redraw.
+            </p>
+
+            <h2>Recap</h2>
+            <ul class="checklist">
+              <li>Understood <code>runApp()</code> and the widget tree (the hamburger analogy)</li>
+              <li>Built a <code>StatelessWidget</code> screen with <code>MaterialApp</code> and <code>Scaffold</code></li>
+              <li>Laid out a UI using <code>Column</code>, <code>Row</code>, and <code>Container</code></li>
+              <li>Converted a widget to <code>StatefulWidget</code> and used <code>setState()</code> to make it interactive</li>
+            </ul>
+
+            <p>
+              Next, in <strong>Module 3: Object-Oriented Architecture</strong>, we'll stop cramming
+              everything into one file. You'll learn how to split your Dart code into proper classes,
+              separate your game logic from your UI, and add multi-page navigation — the structure
+              you'll need before we start building actual game entities in Module 4.
+            </p>
+
+            <h2 id="full-main-dart">Full main.dart for This Module</h2>
+            <pre><code>import 'package:flutter/material.dart';
 
 void main() {
   runApp(const GameMenuApp());
@@ -393,10 +481,44 @@ class _MenuScreenState extends State<MenuScreen> {
 }
 </code></pre>
 
-    <nav class="module-nav">
-      <a href="module-1.html">&larr; Module 1: Environment Setup</a>
-      <a href="module-3.html">Module 3: Object-Oriented Architecture &rarr;</a>
-    </nav>
-  </main>
+            <div class="lesson-footer-actions">
+              <button class="btn btn-green" id="mark-complete-btn" type="button">Mark complete &amp; unlock next</button>
+            </div>
+          </article>
+
+          <aside class="dartpad-pane">
+            <div class="dartpad-panel">
+              <div class="dartpad-panel-header">
+                <span class="dartpad-panel-title">DartPad — live from GitHub</span>
+                <span class="dartpad-status"><span class="status-dot"></span>Ready</span>
+              </div>
+              <div class="dartpad-panel-label" id="dartpad-panel-label"></div>
+              <iframe id="dartpad-iframe" title="Live DartPad" loading="lazy"></iframe>
+              <div class="dartpad-panel-footer">
+                <button class="btn btn-ghost" id="reload-example-btn" type="button">&#8635; Reload example</button>
+                <a class="btn btn-outline" id="open-in-dartpad-link" href="#" target="_blank" rel="noopener">Open in DartPad &#8599;</a>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <nav class="module-nav">
+          <a href="module-1.html">&larr; Module 1: Environment Setup</a>
+          <a href="module-3.html">Module 3: Object-Oriented Architecture &rarr;</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/lessons-data.js"></script>
+  <script src="../assets/js/progress.js"></script>
+  <script src="../assets/js/shell.js"></script>
+  <script src="../assets/js/dartpad-panel.js"></script>
+  <script>
+    document.getElementById('mark-complete-btn').addEventListener('click', function () {
+      window.FlutterTutorial.progress.markComplete('module-2');
+      window.location.href = 'module-3.html';
+    });
+  </script>
 </body>
 </html>
