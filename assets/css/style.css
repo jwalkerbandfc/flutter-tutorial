@@ -1,0 +1,212 @@
+/* Shared styles for the Flutter Game Tutorial series */
+
+:root {
+  --bg: #0f1117;
+  --surface: #171a23;
+  --surface-alt: #1f2330;
+  --text: #e7e9ee;
+  --text-dim: #a8adba;
+  --accent: #54c5f8;
+  --accent-2: #7ee8b0;
+  --warn: #ffcb6b;
+  --border: #2b2f3d;
+  --code-bg: #0b0d13;
+  --max-width: 860px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.65;
+  font-size: 18px;
+}
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header.site-header a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+}
+
+h1, h2, h3 {
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin-top: 3rem;
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+  color: var(--accent);
+}
+
+.module-badge {
+  display: inline-block;
+  background: var(--surface-alt);
+  color: var(--accent);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.75rem;
+}
+
+p {
+  color: var(--text-dim);
+}
+
+strong {
+  color: var(--text);
+}
+
+a {
+  color: var(--accent);
+}
+
+.callout {
+  background: var(--surface);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.callout.analogy {
+  border-left-color: var(--accent-2);
+}
+
+.callout.warning {
+  border-left-color: var(--warn);
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
+
+.screenshot-placeholder {
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--text-dim);
+  font-style: italic;
+  margin: 1.5rem 0;
+  background: var(--surface);
+}
+
+code, pre {
+  font-family: "Fira Code", "Consolas", monospace;
+}
+
+code {
+  background: var(--code-bg);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--accent-2);
+}
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem;
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: var(--text);
+}
+
+.dartpad-embed {
+  margin: 1.5rem 0;
+}
+
+.dartpad-embed iframe {
+  width: 100%;
+  height: 600px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.file-note {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.file-note.new {
+  background: rgba(126, 232, 176, 0.15);
+  color: var(--accent-2);
+}
+
+.file-note.replace {
+  background: rgba(255, 203, 106, 0.15);
+  color: var(--warn);
+}
+
+.module-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.95rem;
+}
+
+.checklist {
+  list-style: none;
+  padding-left: 0;
+}
+
+.checklist li {
+  padding-left: 1.75rem;
+  position: relative;
+  margin-bottom: 0.5rem;
+  color: var(--text-dim);
+}
+
+.checklist li::before {
+  content: "\2713";
+  position: absolute;
+  left: 0;
+  color: var(--accent-2);
+  font-weight: 700;
+}
