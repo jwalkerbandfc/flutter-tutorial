@@ -6,91 +6,95 @@
   <title>Module 4: Game Entities — Flutter Game Tutorial</title>
   <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
-<body>
-  <header class="site-header">
-    <a href="../index.html">Flutter Game Tutorial</a>
-  </header>
+<body data-root="../" data-lesson="module-4">
+  <div class="app">
+    <header class="app-header" id="app-header-root"></header>
+    <div class="app-body">
+      <aside class="sidebar" id="sidebar-root"></aside>
+      <main class="content">
+        <div class="lesson-header-row">
+          <div>
+            <span class="module-badge">MODULE 4 OF 5</span>
+            <h1>Game Entities</h1>
+          </div>
+          <div class="lesson-tabs">
+            <button class="tab-btn active" id="tab-lesson" type="button">Lesson</button>
+            <button class="tab-btn" id="tab-maindart" type="button">main.dart</button>
+          </div>
+        </div>
 
-  <main>
-    <span class="module-badge">MODULE 4 OF 5</span>
-    <h1>Game Entities</h1>
-    <p>
-      Time to make good on that "the actual game world arrives in Module 4!" placeholder from
-      last time. We're going to build the things that actually live inside a game: a
-      <strong>Player</strong>, some <strong>Obstacles</strong>, and a scrolling
-      <strong>Background</strong>. Each one gets its own class, following exactly the pattern
-      <code>GameSession</code> taught us in Module 3 — self-contained data, with a method that
-      hands back something Flutter can draw.
-    </p>
+        <div class="content-split">
+          <article class="lesson-pane">
+            <p>
+              Time to make good on that "the actual game world arrives in Module 4!" placeholder from
+              last time. We're going to build the things that actually live inside a game: a
+              <strong>Player</strong>, some <strong>Obstacles</strong>, and a scrolling
+              <strong>Background</strong>. Each one gets its own class, following exactly the pattern
+              <code>GameSession</code> taught us in Module 3 — self-contained data, with a method that
+              hands back something Flutter can draw.
+            </p>
 
-    <div class="callout warning">
-      <p>
-        <strong>Setup note (for the course author):</strong> this module has three live DartPad
-        examples. Create a Gist for each code block below and drop each Gist's ID into the
-        matching iframe's <code>id=</code> parameter.
-      </p>
-    </div>
+            <h2>1. What's a Game Entity?</h2>
+            <p>
+              An <strong>entity</strong> is just a fancy word for "a thing that exists in the game
+              world." The player is an entity. Every obstacle is an entity. Even the background counts.
+              Each one needs, at minimum, a position and a way to draw itself.
+            </p>
 
-    <h2>1. What's a Game Entity?</h2>
-    <p>
-      An <strong>entity</strong> is just a fancy word for "a thing that exists in the game
-      world." The player is an entity. Every obstacle is an entity. Even the background counts.
-      Each one needs, at minimum, a position and a way to draw itself.
-    </p>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> remember the vending machine from Module 3 — an object hides
+                its data and only lets you interact through its buttons? Entities work the same way. A
+                <code>Player</code> object will know its own <code>x</code> and <code>y</code> position
+                and have a <code>build()</code> method that draws itself. Nothing outside the class needs
+                to know <em>how</em> it draws itself — just that it can.
+              </p>
+            </div>
 
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> remember the vending machine from Module 3 — an object hides
-        its data and only lets you interact through its buttons? Entities work the same way. A
-        <code>Player</code> object will know its own <code>x</code> and <code>y</code> position
-        and have a <code>build()</code> method that draws itself. Nothing outside the class needs
-        to know <em>how</em> it draws itself — just that it can.
-      </p>
-    </div>
+            <h2>2. Drawing With CustomPaint: A Digital Etch-a-Sketch</h2>
+            <p>
+              So far every visual we've made has been built from ready-made widgets — <code>Text</code>,
+              <code>Icon</code>, <code>Container</code>. For actual game art, we often want to draw exact
+              shapes ourselves. That's what <code>CustomPaint</code> is for.
+            </p>
 
-    <h2>2. Drawing With CustomPaint: A Digital Etch-a-Sketch</h2>
-    <p>
-      So far every visual we've made has been built from ready-made widgets — <code>Text</code>,
-      <code>Icon</code>, <code>Container</code>. For actual game art, we often want to draw exact
-      shapes ourselves. That's what <code>CustomPaint</code> is for.
-    </p>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> a <code>CustomPaint</code> widget hands you a blank sheet — the
+                <code>Canvas</code> — and a pen with an ink color you choose — the <code>Paint</code>.
+                You then give exact instructions: "draw a circle here, this big, in this color." There's
+                no pre-made picture involved; you're describing the shape with math (coordinates and
+                sizes) instead of loading a file.
+              </p>
+            </div>
 
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> a <code>CustomPaint</code> widget hands you a blank sheet — the
-        <code>Canvas</code> — and a pen with an ink color you choose — the <code>Paint</code>.
-        You then give exact instructions: "draw a circle here, this big, in this color." There's
-        no pre-made picture involved; you're describing the shape with math (coordinates and
-        sizes) instead of loading a file.
-      </p>
-    </div>
+            <p>
+              A <code>CustomPaint</code> widget needs a <code>painter</code> — a class extending
+              <code>CustomPainter</code> with a <code>paint(Canvas canvas, Size size)</code> method,
+              where you call things like <code>canvas.drawOval()</code> or <code>canvas.drawRect()</code>.
+              It also needs a <code>shouldRepaint()</code> method, which tells Flutter whether to redraw
+              when something changes — we'll return <code>false</code> for now, since nothing's moving
+              yet. That changes in Module 5.
+            </p>
 
-    <p>
-      A <code>CustomPaint</code> widget needs a <code>painter</code> — a class extending
-      <code>CustomPainter</code> with a <code>paint(Canvas canvas, Size size)</code> method,
-      where you call things like <code>canvas.drawOval()</code> or <code>canvas.drawRect()</code>.
-      It also needs a <code>shouldRepaint()</code> method, which tells Flutter whether to redraw
-      when something changes — we'll return <code>false</code> for now, since nothing's moving
-      yet. That changes in Module 5.
-    </p>
+            <h3>Example 1: The Player Entity</h3>
+            <p>
+              Let's build our player: an orange blob with one eye, drawn with <code>CustomPaint</code>,
+              wrapped in a <code>Player</code> class that knows its own position on screen. We'll drop it
+              onto <code>GameScreen</code>, replacing that placeholder text from Module 3.
+            </p>
 
-    <h3>Example 1: The Player Entity</h3>
-    <p>
-      Let's build our player: an orange blob with one eye, drawn with <code>CustomPaint</code>,
-      wrapped in a <code>Player</code> class that knows its own position on screen. We'll drop it
-      onto <code>GameScreen</code>, replacing that placeholder text from Module 3.
-    </p>
-
-    <span class="file-note replace">Adds to the Module 3 file — replaces GameScreen's body</span>
-    <div class="dartpad-embed">
-      <iframe
-        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
-        title="Module 4 Example 1: Player entity"
-        loading="lazy">
-      </iframe>
-    </div>
-
-    <pre><code>// ...GameSession, GameMenuApp, and MenuScreen are unchanged from Module 3.
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note replace">Adds to Module 3 — replaces GameScreen's body</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-4-example-1.dart"
+                  data-label="Module 4 Example 1: Player entity"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+              <pre><code>// ...GameSession, GameMenuApp, and MenuScreen are unchanged from Module 3.
 // Only GameScreen changes, plus these two new classes at the bottom.
 
 class GameScreen extends StatelessWidget {
@@ -151,44 +155,46 @@ class _PlayerPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }</code></pre>
+            </div>
 
-    <p>
-      Notice <code>Player</code> isn't a widget at all — it's a plain Dart class holding
-      <code>x</code> and <code>y</code>, with a <code>build()</code> method that returns a
-      <code>Positioned</code> widget. <code>Positioned</code> only works directly inside a
-      <code>Stack</code>, and it pins its child an exact distance from the edges you specify
-      (here, <code>left</code> and <code>top</code>) rather than centering it.
-    </p>
+            <p>
+              Notice <code>Player</code> isn't a widget at all — it's a plain Dart class holding
+              <code>x</code> and <code>y</code>, with a <code>build()</code> method that returns a
+              <code>Positioned</code> widget. <code>Positioned</code> only works directly inside a
+              <code>Stack</code>, and it pins its child an exact distance from the edges you specify
+              (here, <code>left</code> and <code>top</code>) rather than centering it.
+            </p>
 
-    <h2>3. Stacking Layers: Overhead Projector Transparencies</h2>
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> think of a <code>Stack</code> like a pile of transparent sheets
-        on an overhead projector. Each sheet (each child) sits directly on top of the one before
-        it, and you can see through the gaps to whatever's underneath. The background goes on the
-        bottom sheet, obstacles go on the next sheet up, the player goes above that, and the score
-        text sits on the very top sheet.
-      </p>
-    </div>
+            <h2>3. Stacking Layers: Overhead Projector Transparencies</h2>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> think of a <code>Stack</code> like a pile of transparent sheets
+                on an overhead projector. Each sheet (each child) sits directly on top of the one before
+                it, and you can see through the gaps to whatever's underneath. The background goes on the
+                bottom sheet, obstacles go on the next sheet up, the player goes above that, and the score
+                text sits on the very top sheet.
+              </p>
+            </div>
 
-    <h3>Example 2: Adding an Obstacle</h3>
-    <p>
-      Now let's add something for the player to avoid. <code>Obstacle</code> follows the exact
-      same pattern as <code>Player</code> — its own class, its own painter, its own
-      <code>build()</code> method — proof that once you've learned the entity pattern once, every
-      new game object is the same shape of work.
-    </p>
+            <h3>Example 2: Adding an Obstacle</h3>
+            <p>
+              Now let's add something for the player to avoid. <code>Obstacle</code> follows the exact
+              same pattern as <code>Player</code> — its own class, its own painter, its own
+              <code>build()</code> method — proof that once you've learned the entity pattern once, every
+              new game object is the same shape of work.
+            </p>
 
-    <span class="file-note new">Adds to Example 1 — new Obstacle class in the Stack</span>
-    <div class="dartpad-embed">
-      <iframe
-        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
-        title="Module 4 Example 2: Obstacle entity"
-        loading="lazy">
-      </iframe>
-    </div>
-
-    <pre><code>class GameScreen extends StatelessWidget {
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note new">Adds to Example 1 — new Obstacle class in the Stack</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-4-example-2.dart"
+                  data-label="Module 4 Example 2: Obstacle entity"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+              <pre><code>class GameScreen extends StatelessWidget {
   final GameSession session;
 
   const GameScreen({super.key, required this.session});
@@ -245,92 +251,326 @@ class _ObstaclePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }</code></pre>
+            </div>
 
-    <p>
-      Order matters inside <code>children</code>: <code>obstacle.build()</code> is listed before
-      <code>player.build()</code>, so the obstacle sits on a lower "sheet" and the player is drawn
-      on top of it — useful once we add collision detection in Module 5 and want the player
-      clearly visible.
-    </p>
+            <p>
+              Order matters inside <code>children</code>: <code>obstacle.build()</code> is listed before
+              <code>player.build()</code>, so the obstacle sits on a lower "sheet" and the player is drawn
+              on top of it — useful once we add collision detection in Module 5 and want the player
+              clearly visible.
+            </p>
 
-    <h2>4. External Images: A Photo From a Link</h2>
-    <p>
-      A flat blue rectangle works, but it's not much of a sky. DartPad runs entirely in your
-      browser and can't read image files from your computer, so instead of bundling artwork with
-      the app, we load it from a URL on the internet using <code>Image.network</code>.
-    </p>
+            <h2>4. External Images: A Photo From a Link</h2>
+            <p>
+              A flat blue rectangle works, but it's not much of a sky. DartPad runs entirely in your
+              browser and can't read image files from your computer, so instead of bundling artwork with
+              the app, we load it from a URL on the internet using <code>Image.network</code>.
+            </p>
 
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> back in Module 2 we compared a <code>StatelessWidget</code> to
-        a printed photograph — fixed once it's made. <code>Image.network</code> is more like
-        showing someone a photo through a link instead of a physical print: Flutter fetches it
-        from the address you give it every time the app runs, rather than storing a copy inside
-        the app itself.
-      </p>
-    </div>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> back in Module 2 we compared a <code>StatelessWidget</code> to
+                a printed photograph — fixed once it's made. <code>Image.network</code> is more like
+                showing someone a photo through a link instead of a physical print: Flutter fetches it
+                from the address you give it every time the app runs, rather than storing a copy inside
+                the app itself.
+              </p>
+            </div>
 
-    <p>
-      <code>Image.network</code> takes a URL and, optionally, a <code>fit</code> — we'll use
-      <code>BoxFit.cover</code>, which scales the image to completely fill its space, cropping
-      the edges if it doesn't match the exact proportions.
-    </p>
+            <p>
+              <code>Image.network</code> takes a URL and, optionally, a <code>fit</code> — we'll use
+              <code>BoxFit.cover</code>, which scales the image to completely fill its space, cropping
+              the edges if it doesn't match the exact proportions.
+            </p>
 
-    <div class="callout warning">
-      <p>
-        <strong>In your own project:</strong> once you leave DartPad and build a real Flutter app
-        (back in Android Studio from Module 1), you can instead bundle proper local artwork using
-        an <code>assets:</code> section in <code>pubspec.yaml</code> and <code>Image.asset()</code>
-        — much more reliable than depending on an internet connection. We're using
-        <code>Image.network</code> here purely because DartPad has no way to reach local files.
-      </p>
-    </div>
+            <div class="callout warning">
+              <p>
+                <strong>In your own project:</strong> once you leave DartPad and build a real Flutter app
+                (back in Android Studio from Module 1), you can instead bundle proper local artwork using
+                an <code>assets:</code> section in <code>pubspec.yaml</code> and <code>Image.asset()</code>
+                — much more reliable than depending on an internet connection. We're using
+                <code>Image.network</code> here purely because DartPad has no way to reach local files.
+              </p>
+            </div>
 
-    <h3>Example 3: A Real Background</h3>
-    <p>
-      Let's wrap the image in its own <code>GameBackground</code> widget — following the entity
-      pattern one more time — and swap it in for the flat blue <code>Container</code>.
-    </p>
+            <h3>Example 3: A Real Background</h3>
+            <p>
+              Let's wrap the image in its own <code>GameBackground</code> widget — following the entity
+              pattern one more time — and swap it in for the flat blue <code>Container</code>.
+            </p>
 
-    <span class="file-note replace">Adds to Example 2 — replaces the Container background</span>
-    <div class="dartpad-embed">
-      <iframe
-        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
-        title="Module 4 Example 3: Image background"
-        loading="lazy">
-      </iframe>
-    </div>
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note replace">Adds to Example 2 — replaces the Container background</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-4-example-3.dart"
+                  data-label="Module 4 Example 3: Image background"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+              <pre><code>import 'package:flutter/material.dart';
 
-    <p>
-      The full code — with the background swapped in and a score readout overlaid on top — is in
-      the "Full main.dart" block below.
-    </p>
-    <ul>
-      <li>A new <code>GameBackground</code> widget wraps <code>Image.network()</code> in a <code>Positioned.fill</code>, so it stretches to cover the entire <code>Stack</code>.</li>
-      <li><code>GameBackground</code> goes first in <code>children</code>, so it sits on the bottom sheet, underneath the obstacle and player.</li>
-      <li>A <code>Positioned</code> score readout sits on the very top sheet, using <code>session</code> — the same <code>GameSession</code> object we built back in Module 3.</li>
-    </ul>
+void main() {
+  runApp(const GameMenuApp());
+}
 
-    <h2>Recap</h2>
-    <ul class="checklist">
-      <li>Learned what a game entity is and why each one gets its own class</li>
-      <li>Built a <code>Player</code> entity using <code>CustomPaint</code> and a <code>CustomPainter</code></li>
-      <li>Built an <code>Obstacle</code> entity using the same pattern</li>
-      <li>Stacked entities in layers using <code>Stack</code> and <code>Positioned</code></li>
-      <li>Loaded a background image over the network with <code>Image.network</code></li>
-    </ul>
+/// Holds the game's data and rules — no widgets, no UI, just logic.
+class GameSession {
+  int _score = 0;
+  int _lives = 3;
 
-    <p>
-      Everything on screen right now is frozen in place — the player doesn't fall, the obstacle
-      doesn't move, nothing reacts to anything. In <strong>Module 5: The Game Loop</strong>,
-      we'll fix that: you'll learn how <code>AnimationController</code> and <code>Ticker</code>
-      redraw the screen dozens of times a second, how to add gravity and let the player jump, and
-      how to detect when the player and an obstacle collide. That's the module where this stops
-      being a picture and starts being a game.
-    </p>
+  int get score => _score;
+  int get lives => _lives;
+  bool get isGameOver => _lives <= 0;
 
-    <h2>Full main.dart for This Module</h2>
-    <pre><code>import 'package:flutter/material.dart';
+  void addPoint() {
+    _score++;
+  }
+
+  void loseLife() {
+    if (_lives > 0) {
+      _lives--;
+    }
+  }
+}
+
+class GameMenuApp extends StatelessWidget {
+  const GameMenuApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Game Menu',
+      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.indigo),
+      home: const MenuScreen(),
+    );
+  }
+}
+
+class MenuScreen extends StatefulWidget {
+  const MenuScreen({super.key});
+
+  @override
+  State<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends State<MenuScreen> {
+  final GameSession _session = GameSession();
+
+  void _addPoint() {
+    setState(() {
+      _session.addPoint();
+    });
+  }
+
+  void _openGameScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => GameScreen(session: _session)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Sky Runner')),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text(
+              'Welcome, Player!',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.indigo.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.favorite, color: Colors.red),
+                  const SizedBox(width: 8),
+                  Text('Lives: ${_session.lives}', style: const TextStyle(fontSize: 18)),
+                  const SizedBox(width: 24),
+                  const Icon(Icons.star, color: Colors.amber),
+                  const SizedBox(width: 8),
+                  Text('Score: ${_session.score}', style: const TextStyle(fontSize: 18)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: _addPoint,
+              child: const Text('Tap to score a point!'),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton(
+              onPressed: _openGameScreen,
+              child: const Text('Play'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class GameScreen extends StatelessWidget {
+  final GameSession session;
+
+  const GameScreen({super.key, required this.session});
+
+  @override
+  Widget build(BuildContext context) {
+    final player = Player(x: 40, y: 240);
+    final obstacle = Obstacle(x: 260);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Game')),
+      body: SizedBox.expand(
+        child: Stack(
+          children: [
+            const GameBackground(),
+            obstacle.build(),
+            player.build(),
+            Positioned(
+              top: 16,
+              left: 16,
+              child: Text(
+                'Score: ${session.score}',
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  shadows: [Shadow(blurRadius: 4, color: Colors.black)],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The player character — an entity with a position and a way to draw itself.
+class Player {
+  double x;
+  double y;
+  final double size;
+
+  Player({required this.x, required this.y, this.size = 50});
+
+  Widget build() {
+    return Positioned(
+      left: x,
+      top: y,
+      child: CustomPaint(
+        size: Size(size, size),
+        painter: _PlayerPainter(),
+      ),
+    );
+  }
+}
+
+class _PlayerPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final body = Paint()..color = Colors.orange;
+    canvas.drawOval(Rect.fromLTWH(0, 0, size.width, size.height), body);
+
+    final eye = Paint()..color = Colors.black;
+    canvas.drawCircle(Offset(size.width * 0.68, size.height * 0.35), 4, eye);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// An obstacle the player has to avoid — same entity pattern as Player.
+class Obstacle {
+  double x;
+  final double width;
+  final double height;
+
+  Obstacle({required this.x, this.width = 40, this.height = 140});
+
+  Widget build() {
+    return Positioned(
+      left: x,
+      bottom: 0,
+      child: CustomPaint(
+        size: Size(width, height),
+        painter: _ObstaclePainter(),
+      ),
+    );
+  }
+}
+
+class _ObstaclePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.green.shade700;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// The scrolling backdrop. DartPad can't read local asset files, so we load
+/// artwork from a hosted URL instead.
+class GameBackground extends StatelessWidget {
+  const GameBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Image.network(
+        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <p>
+              The key additions: a new <code>GameBackground</code> widget wraps
+              <code>Image.network()</code> in a <code>Positioned.fill</code>, so it stretches to cover
+              the entire <code>Stack</code>; <code>GameBackground</code> goes first in
+              <code>children</code>, so it sits on the bottom sheet, underneath the obstacle and player;
+              and a <code>Positioned</code> score readout sits on the very top sheet, using
+              <code>session</code> — the same <code>GameSession</code> object we built back in Module 3.
+            </p>
+
+            <h2>Recap</h2>
+            <ul class="checklist">
+              <li>Learned what a game entity is and why each one gets its own class</li>
+              <li>Built a <code>Player</code> entity using <code>CustomPaint</code> and a <code>CustomPainter</code></li>
+              <li>Built an <code>Obstacle</code> entity using the same pattern</li>
+              <li>Stacked entities in layers using <code>Stack</code> and <code>Positioned</code></li>
+              <li>Loaded a background image over the network with <code>Image.network</code></li>
+            </ul>
+
+            <p>
+              Everything on screen right now is frozen in place — the player doesn't fall, the obstacle
+              doesn't move, nothing reacts to anything. In <strong>Module 5: The Game Loop</strong>,
+              we'll fix that: you'll learn how <code>AnimationController</code> and <code>Ticker</code>
+              redraw the screen dozens of times a second, how to add gravity and let the player jump, and
+              how to detect when the player and an obstacle collide. That's the module where this stops
+              being a picture and starts being a game.
+            </p>
+
+            <h2 id="full-main-dart">Full main.dart for This Module</h2>
+            <pre><code>import 'package:flutter/material.dart';
 
 void main() {
   runApp(const GameMenuApp());
@@ -563,10 +803,44 @@ class GameBackground extends StatelessWidget {
 }
 </code></pre>
 
-    <nav class="module-nav">
-      <a href="module-3.html">&larr; Module 3: Object-Oriented Architecture</a>
-      <a href="module-5.html">Module 5: The Game Loop &rarr;</a>
-    </nav>
-  </main>
+            <div class="lesson-footer-actions">
+              <button class="btn btn-green" id="mark-complete-btn" type="button">Mark complete &amp; unlock next</button>
+            </div>
+          </article>
+
+          <aside class="dartpad-pane">
+            <div class="dartpad-panel">
+              <div class="dartpad-panel-header">
+                <span class="dartpad-panel-title">DartPad — live from GitHub</span>
+                <span class="dartpad-status"><span class="status-dot"></span>Ready</span>
+              </div>
+              <div class="dartpad-panel-label" id="dartpad-panel-label"></div>
+              <iframe id="dartpad-iframe" title="Live DartPad" loading="lazy"></iframe>
+              <div class="dartpad-panel-footer">
+                <button class="btn btn-ghost" id="reload-example-btn" type="button">&#8635; Reload example</button>
+                <a class="btn btn-outline" id="open-in-dartpad-link" href="#" target="_blank" rel="noopener">Open in DartPad &#8599;</a>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <nav class="module-nav">
+          <a href="module-3.html">&larr; Module 3: Object-Oriented Architecture</a>
+          <a href="module-5.html">Module 5: The Game Loop &rarr;</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/lessons-data.js"></script>
+  <script src="../assets/js/progress.js"></script>
+  <script src="../assets/js/shell.js"></script>
+  <script src="../assets/js/dartpad-panel.js"></script>
+  <script>
+    document.getElementById('mark-complete-btn').addEventListener('click', function () {
+      window.FlutterTutorial.progress.markComplete('module-4');
+      window.location.href = 'module-5.html';
+    });
+  </script>
 </body>
 </html>

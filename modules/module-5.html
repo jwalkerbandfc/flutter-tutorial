@@ -6,99 +6,103 @@
   <title>Module 5: The Game Loop — Flutter Game Tutorial</title>
   <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
-<body>
-  <header class="site-header">
-    <a href="../index.html">Flutter Game Tutorial</a>
-  </header>
+<body data-root="../" data-lesson="module-5">
+  <div class="app">
+    <header class="app-header" id="app-header-root"></header>
+    <div class="app-body">
+      <aside class="sidebar" id="sidebar-root"></aside>
+      <main class="content">
+        <div class="lesson-header-row">
+          <div>
+            <span class="module-badge">MODULE 5 OF 5</span>
+            <h1>The Game Loop</h1>
+          </div>
+          <div class="lesson-tabs">
+            <button class="tab-btn active" id="tab-lesson" type="button">Lesson</button>
+            <button class="tab-btn" id="tab-maindart" type="button">main.dart</button>
+          </div>
+        </div>
 
-  <main>
-    <span class="module-badge">MODULE 5 OF 5</span>
-    <h1>The Game Loop</h1>
-    <p>
-      Everything on screen right now is frozen — a nice picture, but not a game. This final
-      module fixes that. We're going to make the world move on its own, give the player gravity
-      and a jump, and detect when they crash into something. By the end, you'll have a real,
-      playable game running entirely in your browser.
-    </p>
+        <div class="content-split">
+          <article class="lesson-pane">
+            <p>
+              Everything on screen right now is frozen — a nice picture, but not a game. This final
+              module fixes that. We're going to make the world move on its own, give the player gravity
+              and a jump, and detect when they crash into something. By the end, you'll have a real,
+              playable game running entirely in your browser.
+            </p>
 
-    <div class="callout warning">
-      <p>
-        <strong>Setup note (for the course author):</strong> this module has three live DartPad
-        examples. Create a Gist for each code block below and drop each Gist's ID into the
-        matching iframe's <code>id=</code> parameter.
-      </p>
-    </div>
+            <h2>1. The Flipbook, For Real This Time</h2>
+            <p>
+              Back in Module 2 we mentioned that a game is really just <code>setState()</code> being
+              called over and over, automatically, many times a second. That's the whole secret. A
+              "game loop" is just something that keeps calling a function on a timer, forever, and each
+              call nudges every entity's position a tiny bit before redrawing.
+            </p>
 
-    <h2>1. The Flipbook, For Real This Time</h2>
-    <p>
-      Back in Module 2 we mentioned that a game is really just <code>setState()</code> being
-      called over and over, automatically, many times a second. That's the whole secret. A
-      "game loop" is just something that keeps calling a function on a timer, forever, and each
-      call nudges every entity's position a tiny bit before redrawing.
-    </p>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> a flipbook only looks like it's moving because you flip through
+                dozens of nearly-identical drawings really fast. Nothing on any single page moves — your
+                eye just can't tell the difference between "the ball moved" and "a new picture with the
+                ball slightly further along" flashed past you fast enough. A game loop does exactly that,
+                automatically, roughly 60 times every second.
+              </p>
+            </div>
 
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> a flipbook only looks like it's moving because you flip through
-        dozens of nearly-identical drawings really fast. Nothing on any single page moves — your
-        eye just can't tell the difference between "the ball moved" and "a new picture with the
-        ball slightly further along" flashed past you fast enough. A game loop does exactly that,
-        automatically, roughly 60 times every second.
-      </p>
-    </div>
+            <h2>2. AnimationController vs. Ticker</h2>
+            <p>
+              You may have seen <code>AnimationController</code> used elsewhere in Flutter — it's great
+              for a single animation with a clear start and end, like a button fading in over 300
+              milliseconds. But a game doesn't have an end (until you crash). We need something that
+              just keeps firing, indefinitely, with no built-in duration.
+            </p>
 
-    <h2>2. AnimationController vs. Ticker</h2>
-    <p>
-      You may have seen <code>AnimationController</code> used elsewhere in Flutter — it's great
-      for a single animation with a clear start and end, like a button fading in over 300
-      milliseconds. But a game doesn't have an end (until you crash). We need something that
-      just keeps firing, indefinitely, with no built-in duration.
-    </p>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> think of <code>Ticker</code> as a heartbeat, and
+                <code>AnimationController</code> as a stopwatch built on top of that heartbeat.
+                <code>AnimationController</code> uses the heartbeat to count from 0% to 100% of a fixed
+                animation and then stops. We don't want that — we just want the raw heartbeat itself,
+                firing forever, so we can decide what to do with each beat ourselves.
+              </p>
+            </div>
 
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> think of <code>Ticker</code> as a heartbeat, and
-        <code>AnimationController</code> as a stopwatch built on top of that heartbeat.
-        <code>AnimationController</code> uses the heartbeat to count from 0% to 100% of a fixed
-        animation and then stops. We don't want that — we just want the raw heartbeat itself,
-        firing forever, so we can decide what to do with each beat ourselves.
-      </p>
-    </div>
+            <p>
+              To get a raw <code>Ticker</code>, a <code>State</code> class mixes in
+              <code>SingleTickerProviderStateMixin</code> and calls <code>createTicker()</code>, passing
+              a function that gets called on every single frame.
+            </p>
 
-    <p>
-      To get a raw <code>Ticker</code>, a <code>State</code> class mixes in
-      <code>SingleTickerProviderStateMixin</code> and calls <code>createTicker()</code>, passing
-      a function that gets called on every single frame.
-    </p>
+            <h2>3. Gravity: Speed That Builds Up</h2>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> picture a snowball rolling down a hill. It doesn't instantly hit
+                top speed — every second it rolls, it picks up a bit more speed than it had the second
+                before. Gravity in our game works the same way: every tick, we add a small amount to the
+                player's <strong>falling speed</strong>, and then move the player down by however fast
+                they're currently falling. The longer they fall, the faster they fall.
+              </p>
+            </div>
 
-    <h2>3. Gravity: Speed That Builds Up</h2>
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> picture a snowball rolling down a hill. It doesn't instantly hit
-        top speed — every second it rolls, it picks up a bit more speed than it had the second
-        before. Gravity in our game works the same way: every tick, we add a small amount to the
-        player's <strong>falling speed</strong>, and then move the player down by however fast
-        they're currently falling. The longer they fall, the faster they fall.
-      </p>
-    </div>
+            <h3>Example 1: Gravity Takes Hold</h3>
+            <p>
+              Let's convert <code>GameScreen</code> from a <code>StatelessWidget</code> into a
+              <code>StatefulWidget</code>, wire up a <code>Ticker</code>, and apply gravity to the
+              player each tick until they land on the ground.
+            </p>
 
-    <h3>Example 1: Gravity Takes Hold</h3>
-    <p>
-      Let's convert <code>GameScreen</code> from a <code>StatelessWidget</code> into a
-      <code>StatefulWidget</code>, wire up a <code>Ticker</code>, and apply gravity to the
-      player each tick until they land on the ground.
-    </p>
-
-    <span class="file-note replace">Replaces GameScreen from Module 4</span>
-    <div class="dartpad-embed">
-      <iframe
-        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
-        title="Module 5 Example 1: Gravity"
-        loading="lazy">
-      </iframe>
-    </div>
-
-    <pre><code>// Player, Obstacle, and GameBackground are unchanged from Module 4.
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note replace">Replaces GameScreen from Module 4</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-5-example-1.dart"
+                  data-label="Module 5 Example 1: Gravity"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+              <pre><code>// Player, Obstacle, and GameBackground are unchanged from Module 4.
 // GameScreen is now a StatefulWidget.
 
 class GameScreen extends StatefulWidget {
@@ -171,43 +175,45 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 }</code></pre>
+            </div>
 
-    <p>
-      A few things worth noticing: we swapped the fixed-size <code>SizedBox.expand()</code> for a
-      fixed <code>360×520</code> game viewport — that gives us a known width and height to do
-      physics maths against, wrapped in <code>ClipRect</code> so nothing draws outside it. The
-      <code>_updatePhysics()</code> method runs on every tick, and it's the only place player
-      position changes — exactly the "script" role <code>GameSession</code> played back in
-      Module 3, just for physics instead of score.
-    </p>
+            <p>
+              A few things worth noticing: we swapped the fixed-size <code>SizedBox.expand()</code> for a
+              fixed <code>360×520</code> game viewport — that gives us a known width and height to do
+              physics maths against, wrapped in <code>ClipRect</code> so nothing draws outside it. The
+              <code>_updatePhysics()</code> method runs on every tick, and it's the only place player
+              position changes — exactly the "script" role <code>GameSession</code> played back in
+              Module 3, just for physics instead of score.
+            </p>
 
-    <h2>4. Jumping: A Sudden Kick</h2>
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> gravity builds speed gradually, but a jump is the opposite — an
-        instant burst, like stomping a pogo stick. The moment the player taps the screen, we
-        immediately set their falling speed to a big <em>negative</em> number (upward), and then
-        just let gravity do its normal job of gradually pulling that speed back down to zero and
-        beyond, curving them back to the ground.
-      </p>
-    </div>
+            <h2>4. Jumping: A Sudden Kick</h2>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> gravity builds speed gradually, but a jump is the opposite — an
+                instant burst, like stomping a pogo stick. The moment the player taps the screen, we
+                immediately set their falling speed to a big <em>negative</em> number (upward), and then
+                just let gravity do its normal job of gradually pulling that speed back down to zero and
+                beyond, curving them back to the ground.
+              </p>
+            </div>
 
-    <h3>Example 2: Tap to Jump</h3>
-    <p>
-      Let's wrap the game viewport in a <code>GestureDetector</code> and give the player an
-      upward kick of velocity whenever it's tapped.
-    </p>
+            <h3>Example 2: Tap to Jump</h3>
+            <p>
+              Let's wrap the game viewport in a <code>GestureDetector</code> and give the player an
+              upward kick of velocity whenever it's tapped.
+            </p>
 
-    <span class="file-note new">Adds to Example 1 — adds jump velocity and a GestureDetector</span>
-    <div class="dartpad-embed">
-      <iframe
-        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
-        title="Module 5 Example 2: Jumping"
-        loading="lazy">
-      </iframe>
-    </div>
-
-    <pre><code>class _GameScreenState extends State<GameScreen>
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note new">Adds to Example 1 — adds jump velocity and a GestureDetector</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-5-example-2.dart"
+                  data-label="Module 5 Example 2: Jumping"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+              <pre><code>class _GameScreenState extends State<GameScreen>
     with SingleTickerProviderStateMixin {
   static const double gameWidth = 360;
   static const double gameHeight = 520;
@@ -282,93 +288,247 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 }</code></pre>
+            </div>
 
-    <p>
-      Try tapping repeatedly in the embed above — each tap resets the falling speed to
-      <code>jumpVelocity</code> (a big upward number), and from that point on, gravity takes back
-      over exactly as before, curving the player back down. That's the entire "feel" of a
-      jump-based game, in about four lines of physics.
-    </p>
+            <p>
+              Try tapping repeatedly in the panel above — each tap resets the falling speed to
+              <code>jumpVelocity</code> (a big upward number), and from that point on, gravity takes back
+              over exactly as before, curving the player back down. That's the entire "feel" of a
+              jump-based game, in about four lines of physics.
+            </p>
 
-    <h2>5. Bounding-Box Collision: Do Two Boxes Touch?</h2>
-    <p>
-      Our player is drawn as an oval and the obstacle as a rectangle, but checking whether an
-      oval and a rectangle precisely overlap is fiddly maths. Almost every 2D game cheats: it
-      draws an invisible rectangle — a <strong>bounding box</strong> — around each entity, and
-      just checks whether those two rectangles overlap.
-    </p>
+            <h2>5. Bounding-Box Collision: Do Two Boxes Touch?</h2>
+            <p>
+              Our player is drawn as an oval and the obstacle as a rectangle, but checking whether an
+              oval and a rectangle precisely overlap is fiddly maths. Almost every 2D game cheats: it
+              draws an invisible rectangle — a <strong>bounding box</strong> — around each entity, and
+              just checks whether those two rectangles overlap.
+            </p>
 
-    <div class="callout analogy">
-      <p>
-        <strong>Analogy:</strong> imagine each entity casts a rectangular shadow straight down
-        onto the floor, regardless of its actual shape. Instead of comparing the complicated
-        shapes themselves, we just check whether the two <em>shadows</em> overlap. It's not
-        perfectly precise — a bit of empty space at an oval's corners might count as a "hit" —
-        but it's fast, simple, and good enough for almost every game.
-      </p>
-    </div>
+            <div class="callout analogy">
+              <p>
+                <strong>Analogy:</strong> imagine each entity casts a rectangular shadow straight down
+                onto the floor, regardless of its actual shape. Instead of comparing the complicated
+                shapes themselves, we just check whether the two <em>shadows</em> overlap. It's not
+                perfectly precise — a bit of empty space at an oval's corners might count as a "hit" —
+                but it's fast, simple, and good enough for almost every game.
+              </p>
+            </div>
 
-    <p>
-      Flutter's <code>Rect</code> class has exactly this check built in:
-      <code>rectA.overlaps(rectB)</code> returns <code>true</code> if the two rectangles share
-      any space at all.
-    </p>
+            <p>
+              Flutter's <code>Rect</code> class has exactly this check built in:
+              <code>rectA.overlaps(rectB)</code> returns <code>true</code> if the two rectangles share
+              any space at all.
+            </p>
 
-    <h3>Example 3: Obstacles, Collision, and Game Over</h3>
-    <p>
-      For the final piece, let's bring the obstacle back, scroll it toward the player, recycle it
-      (and score a point) once it passes off the left edge, and end the game the moment the
-      player's bounding box touches the obstacle's.
-    </p>
+            <h3>Example 3: Obstacles, Collision, and Game Over</h3>
+            <p>
+              For the final piece, let's bring the obstacle back, scroll it toward the player, recycle it
+              (and score a point) once it passes off the left edge, and end the game the moment the
+              player's bounding box touches the obstacle's.
+            </p>
 
-    <span class="file-note replace">Adds to Example 2 — replaces the entire file</span>
-    <div class="dartpad-embed">
-      <iframe
-        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
-        title="Module 5 Example 3: Full game loop"
-        loading="lazy">
-      </iframe>
-    </div>
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note replace">Adds to Example 2 — replaces the entire file</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-5-example-3.dart"
+                  data-label="Module 5 Example 3: Full game loop"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+              <pre><code>class _GameScreenState extends State<GameScreen>
+    with SingleTickerProviderStateMixin {
+  static const double gameWidth = 360;
+  static const double gameHeight = 520;
+  static const double gravity = 0.6;
+  static const double jumpVelocity = -12;
 
-    <p>
-      The complete file is below. The key additions on top of Example 2:
-    </p>
-    <ul>
-      <li><code>_obstacle.x -= 3</code> every tick scrolls it leftward; once it's fully off-screen, it's recycled back to the right edge and <code>_session.addPoint()</code> is called — the player "survived" it.</li>
-      <li><code>_checkCollision()</code> builds a <code>Rect</code> for the player and one for the obstacle, using their <code>x</code>, <code>y</code>, and size, then checks <code>.overlaps()</code>.</li>
-      <li>On collision, <code>_isGameOver</code> flips to <code>true</code>, <code>_session.loseLife()</code> is called, the ticker stops, and a "Game Over" overlay appears with the final score and a button back to the menu.</li>
-    </ul>
+  late final Ticker _ticker;
+  late Player _player;
+  late Obstacle _obstacle;
+  double _velocityY = 0;
+  bool _isGameOver = false;
 
-    <h2>Recap</h2>
-    <ul class="checklist">
-      <li>Built a continuous game loop using <code>Ticker</code> and <code>SingleTickerProviderStateMixin</code></li>
-      <li>Applied gravity as speed that accumulates each tick</li>
-      <li>Added a jump as an instant burst of upward velocity</li>
-      <li>Scrolled and recycled an obstacle, scoring a point each time it's survived</li>
-      <li>Detected collisions using bounding-box <code>Rect.overlaps()</code></li>
-      <li>Ended the game and showed a Game Over overlay tied back to <code>GameSession</code></li>
-    </ul>
+  GameSession get _session => widget.session;
 
-    <h2>You Built a Game</h2>
-    <p>
-      Seriously — go back and look at what's in that "Full main.dart" block below. Five modules
-      ago, none of that existed. You installed a dev environment from scratch, learned Flutter's
-      core building blocks, structured real object-oriented Dart code, built game entities from
-      raw shapes and networked images, and wired them all up into a loop that runs dozens of
-      times a second. That's a complete, working, playable game.
-    </p>
-    <p>
-      A few natural next steps, if you want to keep going on your own:
-    </p>
-    <ul>
-      <li><strong>Multiple obstacles</strong> — a <code>List&lt;Obstacle&gt;</code> instead of a single one, spawned at random intervals.</li>
-      <li><strong>Difficulty ramp</strong> — increase the scroll speed as <code>_session.score</code> climbs.</li>
-      <li><strong>Sound and particle effects</strong> — packages like <code>audioplayers</code> add real feedback on jumps and crashes.</li>
-      <li><strong>Bigger apps</strong> — once your state gets more complex than one <code>GameSession</code> object, look into state-management packages like <code>provider</code> or <code>riverpod</code>.</li>
-    </ul>
+  @override
+  void initState() {
+    super.initState();
+    _player = Player(x: 40, y: gameHeight - 50);
+    _obstacle = Obstacle(x: gameWidth);
+    _ticker = createTicker(_onTick)..start();
+  }
 
-    <h2>Full main.dart for This Module</h2>
-    <pre><code>import 'package:flutter/material.dart';
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
+
+  void _onTick(Duration elapsed) {
+    if (_isGameOver) return;
+    setState(_updatePhysics);
+  }
+
+  void _updatePhysics() {
+    _velocityY += gravity;
+    _player.y += _velocityY;
+
+    final groundY = gameHeight - _player.size;
+    if (_player.y > groundY) {
+      _player.y = groundY;
+      _velocityY = 0;
+    }
+    if (_player.y < 0) {
+      _player.y = 0;
+      _velocityY = 0;
+    }
+
+    _obstacle.x -= 3;
+    if (_obstacle.x + _obstacle.width < 0) {
+      _obstacle.x = gameWidth;
+      _session.addPoint();
+    }
+
+    if (_checkCollision()) {
+      _isGameOver = true;
+      _session.loseLife();
+      _ticker.stop();
+    }
+  }
+
+  bool _checkCollision() {
+    final playerRect = Rect.fromLTWH(_player.x, _player.y, _player.size, _player.size);
+    final obstacleRect = Rect.fromLTWH(
+      _obstacle.x,
+      gameHeight - _obstacle.height,
+      _obstacle.width,
+      _obstacle.height,
+    );
+    return playerRect.overlaps(obstacleRect);
+  }
+
+  void _jump() {
+    if (_isGameOver) return;
+    setState(() {
+      _velocityY = jumpVelocity;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Game')),
+      body: Center(
+        child: GestureDetector(
+          onTap: _jump,
+          child: SizedBox(
+            width: gameWidth,
+            height: gameHeight,
+            child: ClipRect(
+              child: Stack(
+                children: [
+                  const GameBackground(),
+                  _obstacle.build(),
+                  _player.build(),
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: Text(
+                      'Score: ${_session.score}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        shadows: [Shadow(blurRadius: 4, color: Colors.black)],
+                      ),
+                    ),
+                  ),
+                  if (_isGameOver)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.black54,
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Game Over',
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Score: ${_session.score}',
+                                style: const TextStyle(fontSize: 20, color: Colors.white),
+                              ),
+                              const SizedBox(height: 24),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Back to Menu'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <p>
+              The key additions on top of Example 2: <code>_obstacle.x -= 3</code> every tick scrolls it
+              leftward; once it's fully off-screen, it's recycled back to the right edge and
+              <code>_session.addPoint()</code> is called — the player "survived" it.
+              <code>_checkCollision()</code> builds a <code>Rect</code> for the player and one for the
+              obstacle, using their <code>x</code>, <code>y</code>, and size, then checks
+              <code>.overlaps()</code>. On collision, <code>_isGameOver</code> flips to <code>true</code>,
+              <code>_session.loseLife()</code> is called, the ticker stops, and a "Game Over" overlay
+              appears with the final score and a button back to the menu.
+            </p>
+
+            <h2>Recap</h2>
+            <ul class="checklist">
+              <li>Built a continuous game loop using <code>Ticker</code> and <code>SingleTickerProviderStateMixin</code></li>
+              <li>Applied gravity as speed that accumulates each tick</li>
+              <li>Added a jump as an instant burst of upward velocity</li>
+              <li>Scrolled and recycled an obstacle, scoring a point each time it's survived</li>
+              <li>Detected collisions using bounding-box <code>Rect.overlaps()</code></li>
+              <li>Ended the game and showed a Game Over overlay tied back to <code>GameSession</code></li>
+            </ul>
+
+            <h2>You Built a Game</h2>
+            <p>
+              Seriously — go back and look at what's in that "Full main.dart" block below. Five modules
+              ago, none of that existed. You installed a dev environment from scratch, learned Flutter's
+              core building blocks, structured real object-oriented Dart code, built game entities from
+              raw shapes and networked images, and wired them all up into a loop that runs dozens of
+              times a second. That's a complete, working, playable game.
+            </p>
+            <p>
+              A few natural next steps, if you want to keep going on your own:
+            </p>
+            <ul>
+              <li><strong>Multiple obstacles</strong> — a <code>List&lt;Obstacle&gt;</code> instead of a single one, spawned at random intervals.</li>
+              <li><strong>Difficulty ramp</strong> — increase the scroll speed as <code>_session.score</code> climbs.</li>
+              <li><strong>Sound and particle effects</strong> — packages like <code>audioplayers</code> add real feedback on jumps and crashes.</li>
+              <li><strong>Bigger apps</strong> — once your state gets more complex than one <code>GameSession</code> object, look into state-management packages like <code>provider</code> or <code>riverpod</code>.</li>
+            </ul>
+
+            <h2 id="full-main-dart">Full main.dart for This Module</h2>
+            <pre><code>import 'package:flutter/material.dart';
 
 void main() {
   runApp(const GameMenuApp());
@@ -721,10 +881,44 @@ class GameBackground extends StatelessWidget {
 }
 </code></pre>
 
-    <nav class="module-nav">
-      <a href="module-4.html">&larr; Module 4: Game Entities</a>
-      <a href="../index.html">Back to Roadmap</a>
-    </nav>
-  </main>
+            <div class="lesson-footer-actions">
+              <button class="btn btn-green" id="mark-complete-btn" type="button">Mark complete &#127881;</button>
+            </div>
+          </article>
+
+          <aside class="dartpad-pane">
+            <div class="dartpad-panel">
+              <div class="dartpad-panel-header">
+                <span class="dartpad-panel-title">DartPad — live from GitHub</span>
+                <span class="dartpad-status"><span class="status-dot"></span>Ready</span>
+              </div>
+              <div class="dartpad-panel-label" id="dartpad-panel-label"></div>
+              <iframe id="dartpad-iframe" title="Live DartPad" loading="lazy"></iframe>
+              <div class="dartpad-panel-footer">
+                <button class="btn btn-ghost" id="reload-example-btn" type="button">&#8635; Reload example</button>
+                <a class="btn btn-outline" id="open-in-dartpad-link" href="#" target="_blank" rel="noopener">Open in DartPad &#8599;</a>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <nav class="module-nav">
+          <a href="module-4.html">&larr; Module 4: Game Entities</a>
+          <a href="../index.html">Back to Roadmap</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/lessons-data.js"></script>
+  <script src="../assets/js/progress.js"></script>
+  <script src="../assets/js/shell.js"></script>
+  <script src="../assets/js/dartpad-panel.js"></script>
+  <script>
+    document.getElementById('mark-complete-btn').addEventListener('click', function () {
+      window.FlutterTutorial.progress.markComplete('module-5');
+      window.location.href = '../index.html';
+    });
+  </script>
 </body>
 </html>
