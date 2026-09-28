@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 3: Object-Oriented Architecture — Flutter Game Tutorial</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a href="../index.html">Flutter Game Tutorial</a>
+  </header>
+
+  <main>
+    <span class="module-badge">MODULE 3 OF 5</span>
+    <h1>Object-Oriented Architecture</h1>
+    <p>
+      Everything so far has lived inside one <code>_MenuScreenState</code> class, mixing "what
+      the score is" together with "how the score looks on screen." That's fine for a tiny demo,
+      but our game is about to grow a Player, obstacles, a scrolling background, and gravity.
+      Cram all of that into one widget and it turns into a mess nobody can read — including
+      future you. This module is about splitting things up properly, before that happens.
+    </p>
+
+    <div class="callout warning">
+      <p>
+        <strong>Setup note (for the course author):</strong> this module has two live DartPad
+        examples. Create a Gist for each code block below and drop each Gist's ID into the
+        matching iframe's <code>id=</code> parameter.
+      </p>
+    </div>
+
+    <h2>1. Classes and Objects: The Cookie Cutter</h2>
+    <p>
+      You've already been using classes without thinking about it — <code>MenuScreen</code> is a
+      class, and so is <code>GameMenuApp</code>. A <strong>class</strong> is a blueprint that
+      describes what something looks like and what it can do. An <strong>object</strong> (or
+      "instance") is an actual thing built from that blueprint.
+    </p>
+
+    <div class="callout analogy">
+      <p>
+        <strong>Analogy:</strong> a class is a cookie cutter. It defines the shape — a star, say
+        — but it isn't a cookie itself, and it doesn't get eaten. Every time you press it into
+        the dough, you get a new cookie (an object) with that shape. You can stamp out as many
+        cookies as you like from one cutter, and each one is separate — frost one, and the others
+        don't change.
+      </p>
+    </div>
+
+    <h2>2. Encapsulation: The Vending Machine</h2>
+    <p>
+      Right now, our score is just a raw number sitting inside a widget, and anything in that
+      widget can change it directly: <code>_score++</code>. That's risky once your game gets
+      bigger — what if some other part of the code accidentally sets the score to a negative
+      number, or forgets to check if the player still has lives left?
+    </p>
+
+    <div class="callout analogy">
+      <p>
+        <strong>Analogy:</strong> think of a vending machine. You don't open the back panel and
+        grab a can yourself — you press a button, and the machine handles dispensing the can,
+        checking your money, and updating its own stock count internally. You only interact with
+        it through its buttons (its public methods), never by reaching inside. That's
+        <strong>encapsulation</strong>: keeping an object's data private, and only allowing
+        controlled changes through methods you've written on purpose.
+      </p>
+    </div>
+
+    <h2>3. Separating Logic from UI: Script vs. Actor</h2>
+    <p>
+      This is the big idea for this module. Instead of storing game data directly inside a
+      widget's state, we'll create a plain Dart class that holds the data and the rules for
+      changing it — with no Flutter, no widgets, nothing about pixels or colors at all. The
+      widget's only job becomes: show whatever that class currently says, and call its methods
+      when the player does something.
+    </p>
+
+    <div class="callout analogy">
+      <p>
+        <strong>Analogy:</strong> think of a play. The <strong>script</strong> decides what
+        happens — when a character scores a point, when they lose a life, what the rules of the
+        story are. The <strong>actor</strong> just performs whatever the script currently says,
+        out loud, for the audience to see. You could swap in a completely different actor (a
+        different UI — maybe a bar chart instead of text) and the script wouldn't need to change
+        at all. That separation is exactly why Module 4's Player, Obstacle, and Background
+        classes will work independently of however we choose to draw them.
+      </p>
+    </div>
+
+    <h3>Example 1: Extracting a GameSession Class</h3>
+    <p>
+      Let's pull the score and lives logic out of <code>_MenuScreenState</code> and into its own
+      class, <code>GameSession</code>. It keeps <code>_score</code> and <code>_lives</code>
+      private, and only exposes them through <strong>getters</strong> (read-only access) and
+      methods like <code>addPoint()</code> and <code>loseLife()</code> — the vending machine
+      buttons.
+    </p>
+
+    <span class="file-note replace">Replaces the entire file</span>
+    <div class="dartpad-embed">
+      <iframe
+        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
+        title="Module 3 Example 1: GameSession class"
+        loading="lazy">
+      </iframe>
+    </div>
+
+    <pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const GameMenuApp());
+}
+
+/// Holds the game's data and rules — no widgets, no UI, just logic.
+class GameSession {
+  int _score = 0;
+  int _lives = 3;
+
+  int get score => _score;
+  int get lives => _lives;
+  bool get isGameOver => _lives <= 0;
+
+  void addPoint() {
+    _score++;
+  }
+
+  void loseLife() {
+    if (_lives > 0) {
+      _lives--;
+    }
+  }
+}
+
+class GameMenuApp extends StatelessWidget {
+  const GameMenuApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Game Menu',
+      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.indigo),
+      home: const MenuScreen(),
+    );
+  }
+}
+
+class MenuScreen extends StatefulWidget {
+  const MenuScreen({super.key});
+
+  @override
+  State<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends State<MenuScreen> {
+  final GameSession _session = GameSession();
+
+  void _addPoint() {
+    setState(() {
+      _session.addPoint();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Sky Runner')),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text(
+              'Welcome, Player!',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.indigo.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.favorite, color: Colors.red),
+                  const SizedBox(width: 8),
+                  Text('Lives: ${_session.lives}', style: const TextStyle(fontSize: 18)),
+                  const SizedBox(width: 24),
+                  const Icon(Icons.star, color: Colors.amber),
+                  const SizedBox(width: 8),
+                  Text('Score: ${_session.score}', style: const TextStyle(fontSize: 18)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: _addPoint,
+              child: const Text('Tap to score a point!'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+
+    <p>
+      Notice the widget got <em>simpler</em>, not more complicated. <code>_MenuScreenState</code>
+      no longer knows or cares how scoring works — it just calls
+      <code>_session.addPoint()</code> and redraws. All the actual game rules live in
+      <code>GameSession</code>, completely separate from anything Flutter-related. You could copy
+      that class into a totally different app and it would still work.
+    </p>
+
+    <h2>4. Multi-Page Navigation: A Stack of Index Cards</h2>
+    <p>
+      Right now everything happens on one screen. Real apps — and our game — need more than one:
+      a menu, a game screen, maybe a game-over screen later. Flutter handles this with something
+      called the <strong>Navigator</strong>.
+    </p>
+
+    <div class="callout analogy">
+      <p>
+        <strong>Analogy:</strong> think of your screens as a stack of index cards on a desk. You
+        only ever see the card on top. <code>Navigator.push()</code> lays a new card down on top
+        of the stack — that's you moving to a new screen. <code>Navigator.pop()</code> lifts the
+        top card away, revealing whatever card was underneath — that's the "back" behavior you
+        get for free, including that back arrow that shows up automatically in the app bar.
+      </p>
+    </div>
+
+    <p>
+      To push a new screen, you wrap the widget you want to show in a
+      <code>MaterialPageRoute</code>, which just tells Flutter how to animate the transition:
+    </p>
+
+    <pre><code>Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => const GameScreen()),
+);</code></pre>
+
+    <h3>Example 2: Adding a Game Screen</h3>
+    <p>
+      Let's add a "Play" button to the menu that pushes a new <code>GameScreen</code>. We'll hand
+      it our existing <code>GameSession</code> object — proof that separating logic from UI pays
+      off, since the same session object can now be shared between two completely different
+      screens.
+    </p>
+
+    <span class="file-note new">Adds to Example 1 — new GameScreen class, plus a Play button</span>
+    <div class="dartpad-embed">
+      <iframe
+        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
+        title="Module 3 Example 2: Multi-page navigation"
+        loading="lazy">
+      </iframe>
+    </div>
+
+    <p>
+      The full code, including the new <code>GameScreen</code>, is in the "Full main.dart" block
+      at the end of this module. The key additions are:
+    </p>
+    <ul>
+      <li>A new <code>GameScreen</code> widget that takes a <code>GameSession</code> in its constructor and displays its current score.</li>
+      <li>A "Play" <code>ElevatedButton</code> on <code>MenuScreen</code> that calls <code>Navigator.push()</code>, passing the existing <code>_session</code> along.</li>
+      <li>Because <code>GameScreen</code> is wrapped by <code>MaterialPageRoute</code> and pushed onto a <code>Scaffold</code>, Flutter automatically gives it a back arrow in its app bar — no extra code needed.</li>
+    </ul>
+
+    <h2>Recap</h2>
+    <ul class="checklist">
+      <li>Understood classes vs. objects (the cookie-cutter analogy)</li>
+      <li>Used encapsulation to keep <code>GameSession</code>'s data private, exposed only through getters and methods</li>
+      <li>Separated game logic (<code>GameSession</code>) from UI (<code>MenuScreen</code>) — the script-and-actor split</li>
+      <li>Added a second screen and navigated between them with <code>Navigator.push()</code></li>
+      <li>Passed an object between screens instead of using globals</li>
+    </ul>
+
+    <p>
+      With logic and UI properly separated, we're ready for the fun part. In
+      <strong>Module 4: Game Entities</strong>, we'll build real OOP classes for the
+      <code>Player</code>, obstacles, and a scrolling background — each one following the exact
+      same pattern as <code>GameSession</code>: a plain Dart class holding the data and rules,
+      drawn to the screen by a widget that just displays whatever state it's given.
+    </p>
+
+    <h2>Full main.dart for This Module</h2>
+    <pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const GameMenuApp());
+}
+
+/// Holds the game's data and rules — no widgets, no UI, just logic.
+class GameSession {
+  int _score = 0;
+  int _lives = 3;
+
+  int get score => _score;
+  int get lives => _lives;
+  bool get isGameOver => _lives <= 0;
+
+  void addPoint() {
+    _score++;
+  }
+
+  void loseLife() {
+    if (_lives > 0) {
+      _lives--;
+    }
+  }
+}
+
+class GameMenuApp extends StatelessWidget {
+  const GameMenuApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Game Menu',
+      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.indigo),
+      home: const MenuScreen(),
+    );
+  }
+}
+
+class MenuScreen extends StatefulWidget {
+  const MenuScreen({super.key});
+
+  @override
+  State<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends State<MenuScreen> {
+  final GameSession _session = GameSession();
+
+  void _addPoint() {
+    setState(() {
+      _session.addPoint();
+    });
+  }
+
+  void _openGameScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => GameScreen(session: _session)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Sky Runner')),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text(
+              'Welcome, Player!',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.indigo.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.favorite, color: Colors.red),
+                  const SizedBox(width: 8),
+                  Text('Lives: ${_session.lives}', style: const TextStyle(fontSize: 18)),
+                  const SizedBox(width: 24),
+                  const Icon(Icons.star, color: Colors.amber),
+                  const SizedBox(width: 8),
+                  Text('Score: ${_session.score}', style: const TextStyle(fontSize: 18)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: _addPoint,
+              child: const Text('Tap to score a point!'),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton(
+              onPressed: _openGameScreen,
+              child: const Text('Play'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class GameScreen extends StatelessWidget {
+  final GameSession session;
+
+  const GameScreen({super.key, required this.session});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Game')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Score so far: ${session.score}',
+              style: const TextStyle(fontSize: 24),
+            ),
+            const SizedBox(height: 16),
+            const Text('The actual game world arrives in Module 4!'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+</code></pre>
+
+    <nav class="module-nav">
+      <a href="module-2.html">&larr; Module 2: The Basics</a>
+      <a href="module-4.html">Module 4: Game Entities &rarr;</a>
+    </nav>
+  </main>
+</body>
+</html>
