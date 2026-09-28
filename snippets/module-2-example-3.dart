@@ -21,10 +21,10 @@ class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
 
   @override
-  State<MenuScreen> createState() => _MenuScreenState();
+  State <MenuScreen> createState() => _MenuScreenState();
 }
 
-class _MenuScreenState extends State<MenuScreen> {
+class _MenuScreenState extends State <MenuScreen> {
   int _score = 0;
 
   void _addPoint() {

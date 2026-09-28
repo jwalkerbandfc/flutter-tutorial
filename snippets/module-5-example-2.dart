@@ -42,10 +42,10 @@ class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
 
   @override
-  State<MenuScreen> createState() => _MenuScreenState();
+  State <MenuScreen> createState() => _MenuScreenState();
 }
 
-class _MenuScreenState extends State<MenuScreen> {
+class _MenuScreenState extends State <MenuScreen> {
   final GameSession _session = GameSession();
 
   void _addPoint() {
@@ -118,10 +118,10 @@ class GameScreen extends StatefulWidget {
   const GameScreen({super.key, required this.session});
 
   @override
-  State<GameScreen> createState() => _GameScreenState();
+  State <GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen>
+class _GameScreenState extends State <GameScreen>
     with SingleTickerProviderStateMixin {
   static const double gameWidth = 360;
   static const double gameHeight = 520;
