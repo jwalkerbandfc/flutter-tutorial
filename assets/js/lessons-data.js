@@ -12,7 +12,7 @@ window.FlutterTutorial.GITHUB = {
   // on main (a short branch-name-pointing window between merge and this
   // update is expected and harmless — it just means the panel briefly
   // serves the previous commit's snippets until this is bumped).
-  ref: '124168274f0c8fc642a3b5982ddec2d16ab70b26',
+  ref: 'b5c0c4cd71ea35c5679daef0b4802ad8ef69bd46',
 };
 
 window.FlutterTutorial.LESSONS = [
