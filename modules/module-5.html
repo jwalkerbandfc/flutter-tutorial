@@ -27,9 +27,9 @@
           <article class="lesson-pane">
             <p>
               Everything on screen right now is frozen — a nice picture, but not a game. This final
-              module fixes that. We're going to make the world move on its own, give the player gravity
-              and a jump, and detect when they crash into something. By the end, you'll have a real,
-              playable game running entirely in your browser.
+              module fixes that. We're going to build the loop up one small piece at a time: first
+              just prove it's ticking, then add gravity, then a jump, then an obstacle, then a way to
+              lose. Five small steps, each adding exactly one new idea to the class before it.
             </p>
 
             <h2>1. The Flipbook, For Real This Time</h2>
@@ -71,7 +71,99 @@
             <p>
               To get a raw <code>Ticker</code>, a <code>State</code> class mixes in
               <code>SingleTickerProviderStateMixin</code> and calls <code>createTicker()</code>, passing
-              a function that gets called on every single frame.
+              a function that gets called on every single frame. <code>Ticker</code> itself lives in
+              <code>package:flutter/scheduler.dart</code> — that's a separate import from
+              <code>material.dart</code>, so every snippet from here on adds it at the top.
+            </p>
+
+            <h3>Example 1: The Ticker Heartbeat</h3>
+            <p>
+              Let's build the smallest possible version first: nothing about gravity or players yet,
+              just proof that the loop is alive. We'll convert <code>GameScreen</code> from a
+              <code>StatelessWidget</code> into a <code>StatefulWidget</code>, and have it count how
+              long it's been running.
+            </p>
+            <p>
+              First, the widget shell — this is the same conversion pattern from Module 2, just with an
+              empty <code>State</code> class for now:
+            </p>
+            <pre><code>class GameScreen extends StatefulWidget {
+  final GameSession session;
+
+  const GameScreen({super.key, required this.session});
+
+  @override
+  State<GameScreen> createState() => _GameScreenState();
+}</code></pre>
+
+            <p>
+              Now add the ticker itself. <code>createTicker()</code> needs a callback — <code>_onTick</code>
+              — that Flutter will call on every frame, passing how much time has elapsed since the ticker
+              started:
+            </p>
+            <pre><code>class _GameScreenState extends State<GameScreen>
+    with SingleTickerProviderStateMixin {
+  late final Ticker _ticker;
+  Duration _elapsed = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = createTicker(_onTick)..start();
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
+
+  void _onTick(Duration elapsed) {
+    setState(() {
+      _elapsed = elapsed;
+    });
+  }
+</code></pre>
+            <p>
+              <code>initState()</code> runs once, when the screen first appears — that's where we create
+              and start the ticker. <code>dispose()</code> runs once, when the screen closes — forgetting
+              to call <code>_ticker.dispose()</code> there would leave the loop running forever in the
+              background, even after the player's left the screen.
+            </p>
+
+            <p>
+              Finally, close the class with a <code>build()</code> that shows the elapsed time — proof,
+              on screen, that <code>_onTick</code> really is firing:
+            </p>
+            <pre><code>  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Game')),
+      body: Center(
+        child: Text(
+          'Running for ${_elapsed.inSeconds}s',
+          style: const TextStyle(fontSize: 28),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note replace">Replaces GameScreen from Module 4</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-5-example-1.dart"
+                  data-label="Module 5 Example 1: The Ticker Heartbeat"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+            </div>
+
+            <p>
+              Hit Run in the panel and watch the counter climb on its own — nothing is tapping or
+              clicking anything. That's the entire heartbeat, with zero game logic attached yet.
             </p>
 
             <h2>3. Gravity: Speed That Builds Up</h2>
@@ -85,36 +177,18 @@
               </p>
             </div>
 
-            <h3>Example 1: Gravity Takes Hold</h3>
+            <h3>Example 2: Player + Gravity</h3>
             <p>
-              Let's convert <code>GameScreen</code> from a <code>StatelessWidget</code> into a
-              <code>StatefulWidget</code>, wire up a <code>Ticker</code>, and apply gravity to the
-              player each tick until they land on the ground.
+              Now let's put that heartbeat to work. We'll bring back the <code>Player</code> entity from
+              Module 4, swap the elapsed-time counter for a fixed <code>360×520</code> game viewport (so
+              we have known dimensions to do physics maths against), and write the function that actually
+              moves the player: <code>_updatePhysics()</code>.
             </p>
-
-            <div class="example-block">
-              <div class="example-toolbar">
-                <span class="file-note replace">Replaces GameScreen from Module 4</span>
-                <button
-                  class="run-in-panel-btn"
-                  type="button"
-                  data-gh-path="snippets/module-5-example-1.dart"
-                  data-label="Module 5 Example 1: Gravity"
-                >&#9654; Run in DartPad panel</button>
-              </div>
-              <pre><code>// Player, Obstacle, and GameBackground are unchanged from Module 4.
-// GameScreen is now a StatefulWidget.
-
-class GameScreen extends StatefulWidget {
-  final GameSession session;
-
-  const GameScreen({super.key, required this.session});
-
-  @override
-  State<GameScreen> createState() => _GameScreenState();
-}
-
-class _GameScreenState extends State<GameScreen>
+            <p>
+              First, new fields for the viewport size, the gravity constant, and the player — created in
+              <code>initState()</code> alongside the ticker:
+            </p>
+            <pre><code>class _GameScreenState extends State<GameScreen>
     with SingleTickerProviderStateMixin {
   static const double gameWidth = 360;
   static const double gameHeight = 520;
@@ -124,8 +198,6 @@ class _GameScreenState extends State<GameScreen>
   late Player _player;
   double _velocityY = 0;
 
-  GameSession get _session => widget.session;
-
   @override
   void initState() {
     super.initState();
@@ -133,13 +205,14 @@ class _GameScreenState extends State<GameScreen>
     _ticker = createTicker(_onTick)..start();
   }
 
-  @override
-  void dispose() {
-    _ticker.dispose();
-    super.dispose();
-  }
+  // dispose() is unchanged from Example 1.</code></pre>
 
-  void _onTick(Duration elapsed) {
+            <p>
+              Next, replace the old <code>_onTick</code> body. Instead of updating a counter, it now
+              hands off to a new method, <code>_updatePhysics()</code> — separating "a tick happened"
+              from "what a tick actually does" is good practice once that logic grows past one line:
+            </p>
+            <pre><code>  void _onTick(Duration elapsed) {
     setState(_updatePhysics);
   }
 
@@ -152,9 +225,19 @@ class _GameScreenState extends State<GameScreen>
       _player.y = groundY;
       _velocityY = 0;
     }
-  }
+  }</code></pre>
+            <p>
+              That's the whole snowball idea in four lines: <code>_velocityY</code> grows by
+              <code>gravity</code> every tick, the player moves down by however fast they're currently
+              falling, and once they'd go past the ground, we snap them back to <code>groundY</code> and
+              zero out the speed so they come to rest instead of sinking through the floor.
+            </p>
 
-  @override
+            <p>
+              Last, update <code>build()</code> to show the fixed-size viewport with the player and
+              background inside it, instead of the elapsed-time text:
+            </p>
+            <pre><code>  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Game')),
@@ -175,15 +258,22 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 }</code></pre>
+
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note new">Adds to Example 1 — Player, gravity, and the fixed viewport</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-5-example-2.dart"
+                  data-label="Module 5 Example 2: Player + Gravity"
+                >&#9654; Run in DartPad panel</button>
+              </div>
             </div>
 
             <p>
-              A few things worth noticing: we swapped the fixed-size <code>SizedBox.expand()</code> for a
-              fixed <code>360×520</code> game viewport — that gives us a known width and height to do
-              physics maths against, wrapped in <code>ClipRect</code> so nothing draws outside it. The
-              <code>_updatePhysics()</code> method runs on every tick, and it's the only place player
-              position changes — exactly the "script" role <code>GameSession</code> played back in
-              Module 3, just for physics instead of score.
+              Run it and watch the player fall and settle on the ground — the first genuinely physical
+              thing this course has built.
             </p>
 
             <h2>4. Jumping: A Sudden Kick</h2>
@@ -197,78 +287,37 @@ class _GameScreenState extends State<GameScreen>
               </p>
             </div>
 
-            <h3>Example 2: Tap to Jump</h3>
+            <h3>Example 3: Tap to Jump</h3>
             <p>
-              Let's wrap the game viewport in a <code>GestureDetector</code> and give the player an
-              upward kick of velocity whenever it's tapped.
+              Three small additions this time. First, a ceiling clamp — add this to the bottom of
+              <code>_updatePhysics()</code>, right after the existing ground check, so a big jump can't
+              send the player flying off the top of the screen:
             </p>
-
-            <div class="example-block">
-              <div class="example-toolbar">
-                <span class="file-note new">Adds to Example 1 — adds jump velocity and a GestureDetector</span>
-                <button
-                  class="run-in-panel-btn"
-                  type="button"
-                  data-gh-path="snippets/module-5-example-2.dart"
-                  data-label="Module 5 Example 2: Jumping"
-                >&#9654; Run in DartPad panel</button>
-              </div>
-              <pre><code>class _GameScreenState extends State<GameScreen>
-    with SingleTickerProviderStateMixin {
-  static const double gameWidth = 360;
-  static const double gameHeight = 520;
-  static const double gravity = 0.6;
-  static const double jumpVelocity = -12;
-
-  late final Ticker _ticker;
-  late Player _player;
-  double _velocityY = 0;
-
-  GameSession get _session => widget.session;
-
-  @override
-  void initState() {
-    super.initState();
-    _player = Player(x: 40, y: 0);
-    _ticker = createTicker(_onTick)..start();
-  }
-
-  @override
-  void dispose() {
-    _ticker.dispose();
-    super.dispose();
-  }
-
-  void _onTick(Duration elapsed) {
-    setState(_updatePhysics);
-  }
-
-  void _updatePhysics() {
-    _velocityY += gravity;
-    _player.y += _velocityY;
-
-    final groundY = gameHeight - _player.size;
-    if (_player.y > groundY) {
-      _player.y = groundY;
-      _velocityY = 0;
-    }
-    if (_player.y < 0) {
+            <pre><code>    if (_player.y < 0) {
       _player.y = 0;
       _velocityY = 0;
     }
-  }
+  }</code></pre>
 
-  void _jump() {
+            <p>
+              Second, the jump itself — a new method that instantly overwrites the falling speed with a
+              big upward number:
+            </p>
+            <pre><code>  void _jump() {
     setState(() {
       _velocityY = jumpVelocity;
     });
-  }
+  }</code></pre>
+            <p>
+              (That needs one more constant alongside <code>gravity</code>: <code>static const double
+              jumpVelocity = -12;</code>)
+            </p>
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Game')),
-      body: Center(
+            <p>
+              Third, wrap the viewport in a <code>GestureDetector</code> in <code>build()</code> so
+              tapping anywhere on it calls <code>_jump</code>:
+            </p>
+            <pre><code>      body: Center(
         child: GestureDetector(
           onTap: _jump,
           child: SizedBox(
@@ -284,17 +333,24 @@ class _GameScreenState extends State<GameScreen>
             ),
           ),
         ),
-      ),
-    );
-  }
-}</code></pre>
+      ),</code></pre>
+
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note new">Adds to Example 2 — jumpVelocity, _jump(), and a GestureDetector</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-5-example-3.dart"
+                  data-label="Module 5 Example 3: Tap to Jump"
+                >&#9654; Run in DartPad panel</button>
+              </div>
             </div>
 
             <p>
               Try tapping repeatedly in the panel above — each tap resets the falling speed to
-              <code>jumpVelocity</code> (a big upward number), and from that point on, gravity takes back
-              over exactly as before, curving the player back down. That's the entire "feel" of a
-              jump-based game, in about four lines of physics.
+              <code>jumpVelocity</code>, and gravity immediately starts curving it back down. That's the
+              entire "feel" of a jump-based game, in about four lines of physics.
             </p>
 
             <h2>5. Bounding-Box Collision: Do Two Boxes Touch?</h2>
@@ -315,41 +371,17 @@ class _GameScreenState extends State<GameScreen>
               </p>
             </div>
 
+            <h3>Example 4: Obstacles Enter the Scene</h3>
             <p>
-              Flutter's <code>Rect</code> class has exactly this check built in:
-              <code>rectA.overlaps(rectB)</code> returns <code>true</code> if the two rectangles share
-              any space at all.
+              Before we can collide with anything, we need something to collide with. Let's bring the
+              <code>Obstacle</code> entity back from Module 4 and get it scrolling — no collision
+              detection yet, just movement and scoring.
             </p>
-
-            <h3>Example 3: Obstacles, Collision, and Game Over</h3>
             <p>
-              For the final piece, let's bring the obstacle back, scroll it toward the player, recycle it
-              (and score a point) once it passes off the left edge, and end the game the moment the
-              player's bounding box touches the obstacle's.
+              Add an <code>Obstacle</code> field, created in <code>initState()</code> just like the
+              player, plus a getter back to the score-tracking <code>GameSession</code> from Module 3:
             </p>
-
-            <div class="example-block">
-              <div class="example-toolbar">
-                <span class="file-note replace">Adds to Example 2 — replaces the entire file</span>
-                <button
-                  class="run-in-panel-btn"
-                  type="button"
-                  data-gh-path="snippets/module-5-example-3.dart"
-                  data-label="Module 5 Example 3: Full game loop"
-                >&#9654; Run in DartPad panel</button>
-              </div>
-              <pre><code>class _GameScreenState extends State<GameScreen>
-    with SingleTickerProviderStateMixin {
-  static const double gameWidth = 360;
-  static const double gameHeight = 520;
-  static const double gravity = 0.6;
-  static const double jumpVelocity = -12;
-
-  late final Ticker _ticker;
-  late Player _player;
-  late Obstacle _obstacle;
-  double _velocityY = 0;
-  bool _isGameOver = false;
+            <pre><code>  late Obstacle _obstacle;
 
   GameSession get _session => widget.session;
 
@@ -359,77 +391,26 @@ class _GameScreenState extends State<GameScreen>
     _player = Player(x: 40, y: gameHeight - 50);
     _obstacle = Obstacle(x: gameWidth);
     _ticker = createTicker(_onTick)..start();
-  }
+  }</code></pre>
 
-  @override
-  void dispose() {
-    _ticker.dispose();
-    super.dispose();
-  }
-
-  void _onTick(Duration elapsed) {
-    if (_isGameOver) return;
-    setState(_updatePhysics);
-  }
-
-  void _updatePhysics() {
-    _velocityY += gravity;
-    _player.y += _velocityY;
-
-    final groundY = gameHeight - _player.size;
-    if (_player.y > groundY) {
-      _player.y = groundY;
-      _velocityY = 0;
-    }
-    if (_player.y < 0) {
-      _player.y = 0;
-      _velocityY = 0;
-    }
-
-    _obstacle.x -= 3;
+            <p>
+              Then add scrolling and recycling to the end of <code>_updatePhysics()</code>: the obstacle
+              slides left every tick, and once it's fully off-screen, it's recycled back to the right
+              edge and counts as a point survived:
+            </p>
+            <pre><code>    _obstacle.x -= 3;
     if (_obstacle.x + _obstacle.width < 0) {
       _obstacle.x = gameWidth;
       _session.addPoint();
     }
+  }</code></pre>
 
-    if (_checkCollision()) {
-      _isGameOver = true;
-      _session.loseLife();
-      _ticker.stop();
-    }
-  }
-
-  bool _checkCollision() {
-    final playerRect = Rect.fromLTWH(_player.x, _player.y, _player.size, _player.size);
-    final obstacleRect = Rect.fromLTWH(
-      _obstacle.x,
-      gameHeight - _obstacle.height,
-      _obstacle.width,
-      _obstacle.height,
-    );
-    return playerRect.overlaps(obstacleRect);
-  }
-
-  void _jump() {
-    if (_isGameOver) return;
-    setState(() {
-      _velocityY = jumpVelocity;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Game')),
-      body: Center(
-        child: GestureDetector(
-          onTap: _jump,
-          child: SizedBox(
-            width: gameWidth,
-            height: gameHeight,
-            child: ClipRect(
-              child: Stack(
-                children: [
+            <p>
+              Finally, add the obstacle and a score readout to the <code>Stack</code> in
+              <code>build()</code>. Order matters here: the obstacle is listed before the player, so it
+              sits on a lower "sheet" and the player stays clearly visible on top of it:
+            </p>
+            <pre><code>                children: [
                   const GameBackground(),
                   _obstacle.build(),
                   _player.build(),
@@ -446,7 +427,74 @@ class _GameScreenState extends State<GameScreen>
                       ),
                     ),
                   ),
-                  if (_isGameOver)
+                ],</code></pre>
+
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note new">Adds to Example 3 — Obstacle scrolling, recycling, and scoring</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-5-example-4.dart"
+                  data-label="Module 5 Example 4: Obstacles Enter the Scene"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+            </div>
+
+            <p>
+              Run it and you'll see the obstacle scroll past the player forever, with the score ticking
+              up each time — but right now the player can fly straight through it. Time to fix that.
+            </p>
+
+            <h3>Example 5: Detect Collisions and End the Game</h3>
+            <p>
+              Flutter's <code>Rect</code> class has the overlap check built in:
+              <code>rectA.overlaps(rectB)</code> returns <code>true</code> if the two rectangles share
+              any space at all. Add a flag for whether the game has ended, plus the check itself as its
+              own method:
+            </p>
+            <pre><code>  bool _isGameOver = false;
+
+  bool _checkCollision() {
+    final playerRect = Rect.fromLTWH(_player.x, _player.y, _player.size, _player.size);
+    final obstacleRect = Rect.fromLTWH(
+      _obstacle.x,
+      gameHeight - _obstacle.height,
+      _obstacle.width,
+      _obstacle.height,
+    );
+    return playerRect.overlaps(obstacleRect);
+  }</code></pre>
+
+            <p>
+              Next, call it at the end of <code>_updatePhysics()</code>, and guard <code>_onTick</code>
+              and <code>_jump</code> so nothing keeps moving once the game is over:
+            </p>
+            <pre><code>    if (_checkCollision()) {
+      _isGameOver = true;
+      _session.loseLife();
+      _ticker.stop();
+    }
+  }
+
+  void _onTick(Duration elapsed) {
+    if (_isGameOver) return;
+    setState(_updatePhysics);
+  }
+
+  void _jump() {
+    if (_isGameOver) return;
+    setState(() {
+      _velocityY = jumpVelocity;
+    });
+  }</code></pre>
+
+            <p>
+              Last piece: a "Game Over" overlay, added to the <code>Stack</code> in <code>build()</code>
+              only when <code>_isGameOver</code> is true, with the final score and a button back to the
+              menu:
+            </p>
+            <pre><code>                  if (_isGameOver)
                     Positioned.fill(
                       child: Container(
                         color: Colors.black54,
@@ -476,36 +524,33 @@ class _GameScreenState extends State<GameScreen>
                           ),
                         ),
                       ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}</code></pre>
+                    ),</code></pre>
+
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note new">Adds to Example 4 — collision detection and the Game Over overlay</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-5-example-5.dart"
+                  data-label="Module 5 Example 5: Collision and Game Over"
+                >&#9654; Run in DartPad panel</button>
+              </div>
             </div>
 
             <p>
-              The key additions on top of Example 2: <code>_obstacle.x -= 3</code> every tick scrolls it
-              leftward; once it's fully off-screen, it's recycled back to the right edge and
-              <code>_session.addPoint()</code> is called — the player "survived" it.
-              <code>_checkCollision()</code> builds a <code>Rect</code> for the player and one for the
-              obstacle, using their <code>x</code>, <code>y</code>, and size, then checks
-              <code>.overlaps()</code>. On collision, <code>_isGameOver</code> flips to <code>true</code>,
-              <code>_session.loseLife()</code> is called, the ticker stops, and a "Game Over" overlay
-              appears with the final score and a button back to the menu.
+              That's a complete game: jump the player over the scrolling obstacle, and the moment you
+              miss, the loop stops itself and shows your score. This final file is also what you'll find
+              in the "Full main.dart" block at the end of this module.
             </p>
 
             <h2>Recap</h2>
             <ul class="checklist">
-              <li>Built a continuous game loop using <code>Ticker</code> and <code>SingleTickerProviderStateMixin</code></li>
-              <li>Applied gravity as speed that accumulates each tick</li>
-              <li>Added a jump as an instant burst of upward velocity</li>
+              <li>Built a continuous game loop using <code>Ticker</code> and <code>SingleTickerProviderStateMixin</code>, one method at a time</li>
+              <li>Applied gravity as speed that accumulates each tick, in its own <code>_updatePhysics()</code> function</li>
+              <li>Added a jump as an instant burst of upward velocity, in its own <code>_jump()</code> function</li>
               <li>Scrolled and recycled an obstacle, scoring a point each time it's survived</li>
-              <li>Detected collisions using bounding-box <code>Rect.overlaps()</code></li>
+              <li>Detected collisions using bounding-box <code>Rect.overlaps()</code>, in its own <code>_checkCollision()</code> function</li>
               <li>Ended the game and showed a Game Over overlay tied back to <code>GameSession</code></li>
             </ul>
 
@@ -529,6 +574,7 @@ class _GameScreenState extends State<GameScreen>
 
             <h2 id="full-main-dart">Full main.dart for This Module</h2>
             <pre><code>import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 void main() {
   runApp(const GameMenuApp());

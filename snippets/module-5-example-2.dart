@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 void main() {
   runApp(const GameMenuApp());
@@ -125,13 +126,10 @@ class _GameScreenState extends State<GameScreen>
   static const double gameWidth = 360;
   static const double gameHeight = 520;
   static const double gravity = 0.6;
-  static const double jumpVelocity = -12;
 
   late final Ticker _ticker;
   late Player _player;
   double _velocityY = 0;
-
-  GameSession get _session => widget.session;
 
   @override
   void initState() {
@@ -159,16 +157,6 @@ class _GameScreenState extends State<GameScreen>
       _player.y = groundY;
       _velocityY = 0;
     }
-    if (_player.y < 0) {
-      _player.y = 0;
-      _velocityY = 0;
-    }
-  }
-
-  void _jump() {
-    setState(() {
-      _velocityY = jumpVelocity;
-    });
   }
 
   @override
@@ -176,18 +164,15 @@ class _GameScreenState extends State<GameScreen>
     return Scaffold(
       appBar: AppBar(title: const Text('Game')),
       body: Center(
-        child: GestureDetector(
-          onTap: _jump,
-          child: SizedBox(
-            width: gameWidth,
-            height: gameHeight,
-            child: ClipRect(
-              child: Stack(
-                children: [
-                  const GameBackground(),
-                  _player.build(),
-                ],
-              ),
+        child: SizedBox(
+          width: gameWidth,
+          height: gameHeight,
+          child: ClipRect(
+            child: Stack(
+              children: [
+                const GameBackground(),
+                _player.build(),
+              ],
             ),
           ),
         ),

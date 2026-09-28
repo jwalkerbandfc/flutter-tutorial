@@ -130,12 +130,16 @@ class _GameScreenState extends State<GameScreen>
 
   late final Ticker _ticker;
   late Player _player;
+  late Obstacle _obstacle;
   double _velocityY = 0;
+
+  GameSession get _session => widget.session;
 
   @override
   void initState() {
     super.initState();
-    _player = Player(x: 40, y: 0);
+    _player = Player(x: 40, y: gameHeight - 50);
+    _obstacle = Obstacle(x: gameWidth);
     _ticker = createTicker(_onTick)..start();
   }
 
@@ -162,6 +166,12 @@ class _GameScreenState extends State<GameScreen>
       _player.y = 0;
       _velocityY = 0;
     }
+
+    _obstacle.x -= 3;
+    if (_obstacle.x + _obstacle.width < 0) {
+      _obstacle.x = gameWidth;
+      _session.addPoint();
+    }
   }
 
   void _jump() {
@@ -184,7 +194,21 @@ class _GameScreenState extends State<GameScreen>
               child: Stack(
                 children: [
                   const GameBackground(),
+                  _obstacle.build(),
                   _player.build(),
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: Text(
+                      'Score: ${_session.score}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        shadows: [Shadow(blurRadius: 4, color: Colors.black)],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -223,6 +247,37 @@ class _PlayerPainter extends CustomPainter {
 
     final eye = Paint()..color = Colors.black;
     canvas.drawCircle(Offset(size.width * 0.68, size.height * 0.35), 4, eye);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// An obstacle the player has to avoid — same entity pattern as Player.
+class Obstacle {
+  double x;
+  final double width;
+  final double height;
+
+  Obstacle({required this.x, this.width = 40, this.height = 140});
+
+  Widget build() {
+    return Positioned(
+      left: x,
+      bottom: 0,
+      child: CustomPaint(
+        size: Size(width, height),
+        painter: _ObstaclePainter(),
+      ),
+    );
+  }
+}
+
+class _ObstaclePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.green.shade700;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
   }
 
   @override
