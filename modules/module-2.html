@@ -76,22 +76,11 @@
 
             <h3>Example 1: A Game Menu Screen</h3>
             <p>
-              Let's build the start screen for our game. This uses <code>MaterialApp</code> (which sets
-              up theming and navigation for the whole app) and <code>Scaffold</code> (which gives you the
-              basic page structure — an app bar up top and a body underneath).
+              Let's build the start screen for our game, one class at a time. First,
+              <code>runApp()</code> and the tiny app shell that just points Flutter at a
+              <code>MaterialApp</code> — this sets up theming and navigation for the whole app:
             </p>
-
-            <div class="example-block">
-              <div class="example-toolbar">
-                <span class="file-note new">New File</span>
-                <button
-                  class="run-in-panel-btn"
-                  type="button"
-                  data-gh-path="snippets/module-2-example-1.dart"
-                  data-label="Module 2 Example 1: Game Menu Screen"
-                >&#9654; Run in DartPad panel</button>
-              </div>
-              <pre><code>import 'package:flutter/material.dart';
+            <pre><code>import 'package:flutter/material.dart';
 
 void main() {
   runApp(const GameMenuApp());
@@ -108,9 +97,12 @@ class GameMenuApp extends StatelessWidget {
       home: const MenuScreen(),
     );
   }
-}
-
-class MenuScreen extends StatelessWidget {
+}</code></pre>
+            <p>
+              <code>home:</code> is where <code>MaterialApp</code> is told what to actually show —
+              here, a widget we haven't written yet called <code>MenuScreen</code>. Let's write it:
+            </p>
+            <pre><code>class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
 
   @override
@@ -126,12 +118,23 @@ class MenuScreen extends StatelessWidget {
     );
   }
 }</code></pre>
-            </div>
-
             <p>
-              Notice <code>MenuScreen</code> only has a <code>build()</code> method — no memory, no
-              changing data. It gets built once and just sits there, like our printed photo.
+              <code>Scaffold</code> gives you the basic page structure — an app bar up top and a body
+              underneath. Notice <code>MenuScreen</code> only has a <code>build()</code> method — no
+              memory, no changing data. It gets built once and just sits there, like our printed photo.
             </p>
+
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note new">New File</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-2-example-1.dart"
+                  data-label="Module 2 Example 1: Game Menu Screen"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+            </div>
 
             <h2>3. Layout Basics: Column, Row, and Container</h2>
             <p>
@@ -159,44 +162,11 @@ class MenuScreen extends StatelessWidget {
 
             <h3>Example 2: Adding a Stats Bar</h3>
             <p>
-              Let's replace that single line of text with a proper layout: a welcome message, and a
-              little card underneath showing the player's lives and score.
+              Let's replace that single line of text with a proper layout. First, wrap the welcome
+              text in <code>Padding</code> and a <code>Column</code>, so we have somewhere to stack a
+              second thing underneath it:
             </p>
-
-            <div class="example-block">
-              <div class="example-toolbar">
-                <span class="file-note replace">Adds to Example 1 — replaces the body of MenuScreen</span>
-                <button
-                  class="run-in-panel-btn"
-                  type="button"
-                  data-gh-path="snippets/module-2-example-2.dart"
-                  data-label="Module 2 Example 2: Stats Bar Layout"
-                >&#9654; Run in DartPad panel</button>
-              </div>
-              <pre><code>import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const GameMenuApp());
-}
-
-class GameMenuApp extends StatelessWidget {
-  const GameMenuApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Game Menu',
-      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.indigo),
-      home: const MenuScreen(),
-    );
-  }
-}
-
-class MenuScreen extends StatelessWidget {
-  const MenuScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
+            <pre><code>  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Sky Runner')),
       body: Padding(
@@ -210,38 +180,53 @@ class MenuScreen extends StatelessWidget {
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.indigo.shade50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.favorite, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Lives: 3', style: TextStyle(fontSize: 18)),
-                  SizedBox(width: 24),
-                  Icon(Icons.star, color: Colors.amber),
-                  SizedBox(width: 8),
-                  Text('Score: 0', style: TextStyle(fontSize: 18)),
-                ],
-              ),
-            ),
+            // the stats card goes here
           ],
         ),
       ),
     );
-  }
-}</code></pre>
-            </div>
-
+  }</code></pre>
+            <p>
+              Now fill in that comment with a little card: a <code>Container</code> for the background
+              and rounded corners, holding a <code>Row</code> that lines the lives and score up side by
+              side:
+            </p>
+            <pre><code>Container(
+  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+  decoration: BoxDecoration(
+    color: Colors.indigo.shade50,
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: const Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(Icons.favorite, color: Colors.red),
+      SizedBox(width: 8),
+      Text('Lives: 3', style: TextStyle(fontSize: 18)),
+      SizedBox(width: 24),
+      Icon(Icons.star, color: Colors.amber),
+      SizedBox(width: 8),
+      Text('Score: 0', style: TextStyle(fontSize: 18)),
+    ],
+  ),
+),</code></pre>
             <p>
               We've nested a <code>Row</code> (the lives/score) inside a <code>Container</code> (the
               card), inside a <code>Column</code> (stacked under the welcome text), inside
               <code>Padding</code> — a mini widget tree, just like the hamburger from earlier.
             </p>
+
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note replace">Adds to Example 1 — replaces the body of MenuScreen</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-2-example-2.dart"
+                  data-label="Module 2 Example 2: Stats Bar Layout"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+            </div>
 
             <h2>4. StatefulWidget: The Whiteboard</h2>
             <p>
@@ -279,9 +264,40 @@ class MenuScreen extends StatelessWidget {
 
             <h3>Example 3: Making the Score Interactive</h3>
             <p>
-              Let's turn <code>MenuScreen</code> into a <code>StatefulWidget</code> and add a button that
-              increases the score each time it's tapped.
+              Three small changes turn this into something you can actually tap. First, the widget
+              shell: <code>MenuScreen</code> now extends <code>StatefulWidget</code> instead of
+              <code>StatelessWidget</code>, and hands off to a matching <code>State</code> class:
             </p>
+            <pre><code>class MenuScreen extends StatefulWidget {
+  const MenuScreen({super.key});
+
+  @override
+  State<MenuScreen> createState() => _MenuScreenState();
+}</code></pre>
+            <p>
+              Next, the <code>State</code> class itself, holding the score as a variable and a method
+              to increase it:
+            </p>
+            <pre><code>class _MenuScreenState extends State<MenuScreen> {
+  int _score = 0;
+
+  void _addPoint() {
+    setState(() {
+      _score++;
+    });
+  }</code></pre>
+            <p>
+              <code>setState()</code> is the important part — it's what tells Flutter "some data
+              changed, redraw the screen." Last, update <code>build()</code> to read <code>_score</code>
+              instead of a fixed <code>0</code>, and add a button that calls <code>_addPoint</code>:
+            </p>
+            <pre><code>            Text('Score: $_score', style: const TextStyle(fontSize: 18)),
+            // ...rest of the stats row is unchanged...
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: _addPoint,
+              child: const Text('Tap to score a point!'),
+            ),</code></pre>
 
             <div class="example-block">
               <div class="example-toolbar">
@@ -293,95 +309,7 @@ class MenuScreen extends StatelessWidget {
                   data-label="Module 2 Example 3: Interactive Score"
                 >&#9654; Run in DartPad panel</button>
               </div>
-              <pre><code>import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const GameMenuApp());
-}
-
-class GameMenuApp extends StatelessWidget {
-  const GameMenuApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Game Menu',
-      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.indigo),
-      home: const MenuScreen(),
-    );
-  }
-}
-
-class MenuScreen extends StatefulWidget {
-  const MenuScreen({super.key});
-
-  @override
-  State<MenuScreen> createState() => _MenuScreenState();
-}
-
-class _MenuScreenState extends State<MenuScreen> {
-  int _score = 0;
-
-  void _addPoint() {
-    setState(() {
-      _score++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sky Runner')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text(
-              'Welcome, Player!',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.indigo.shade50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.favorite, color: Colors.red),
-                  const SizedBox(width: 8),
-                  const Text('Lives: 3', style: TextStyle(fontSize: 18)),
-                  const SizedBox(width: 24),
-                  const Icon(Icons.star, color: Colors.amber),
-                  const SizedBox(width: 8),
-                  Text('Score: $_score', style: const TextStyle(fontSize: 18)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _addPoint,
-              child: const Text('Tap to score a point!'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}</code></pre>
             </div>
-
-            <p>
-              A few things changed: <code>MenuScreen</code> now extends <code>StatefulWidget</code>
-              instead of <code>StatelessWidget</code>; a new class, <code>_MenuScreenState</code>, holds
-              the actual score as a variable; and an <code>ElevatedButton</code> calls
-              <code>_addPoint()</code> when tapped, which calls <code>setState()</code> to increase the
-              score and redraw.
-            </p>
 
             <h2>Recap</h2>
             <ul class="checklist">
