@@ -3,9 +3,7 @@ window.FlutterTutorial = window.FlutterTutorial || {};
 window.FlutterTutorial.GITHUB = {
   owner: 'jwalkerbandfc',
   repo: 'flutter-tutorial',
-  // Points at this working branch so embeds work during review.
-  // Update to 'main' once this branch is merged.
-  ref: 'claude/flutter-game-tutorial-wgylet',
+  ref: 'main',
 };
 
 window.FlutterTutorial.LESSONS = [
