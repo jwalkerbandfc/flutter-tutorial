@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 1: Environment Setup — Flutter Game Tutorial</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a href="../index.html">Flutter Game Tutorial</a>
+  </header>
+
+  <main>
+    <span class="module-badge">MODULE 1 OF 5</span>
+    <h1>Environment Setup</h1>
+    <p>
+      Every game needs a workshop before it needs a game. In this module we're going to install
+      the tools, poke around a real Flutter project, and figure out what all those folders and
+      files actually do. By the end, you'll have a working Flutter setup and you'll understand
+      the map before you start exploring the territory.
+    </p>
+
+    <h2>1. What You're Actually Installing</h2>
+    <p>
+      Flutter apps are written in a language called <strong>Dart</strong>. Think of Dart as the
+      language you'll be speaking, and Flutter as a massive box of pre-built LEGO pieces
+      (buttons, text, images, layouts) that you snap together using that language.
+    </p>
+    <p>
+      To write and run Flutter apps on your own computer, you need two things:
+    </p>
+    <ul>
+      <li><strong>The Flutter SDK</strong> — the actual toolbox: the compiler, the pre-built LEGO pieces, and the command-line tools that turn your code into a real app.</li>
+      <li><strong>Android Studio</strong> — the workshop you do the building in. It's an IDE (a fancy code editor) with a virtual Android phone built in, so you can test your app without owning a physical device.</li>
+    </ul>
+
+    <div class="callout analogy">
+      <p>
+        <strong>Analogy:</strong> if Dart is the language you speak and Flutter is your box of
+        LEGO bricks, Android Studio is the table you build on — and the Flutter SDK is what
+        turns your finished LEGO model into something you can actually press "play" on.
+      </p>
+    </div>
+
+    <h2>2. Install Android Studio</h2>
+    <p>
+      Head to the
+      <a href="https://developer.android.com/studio" target="_blank" rel="noopener">official Android Studio download page</a>
+      and grab the installer for your operating system (Windows, macOS, or Linux).
+    </p>
+    <ol>
+      <li>Run the installer and accept the default options — they're fine for now.</li>
+      <li>When it opens for the first time, let it download the Android SDK components it asks for. This can take a while, so it's a good tea-break moment.</li>
+      <li>Once it's done, you should land on the Android Studio "Welcome" screen.</li>
+    </ol>
+
+    <div class="screenshot-placeholder">
+      [Insert screenshot of the Android Studio 'Welcome' screen here]
+    </div>
+
+    <h2>3. Install the Flutter SDK</h2>
+    <p>
+      Next, grab the Flutter SDK itself from
+      <a href="https://docs.flutter.dev/get-started/install" target="_blank" rel="noopener">flutter.dev</a>.
+      Pick your operating system and follow their install steps — it's usually a case of
+      downloading a zip file and unpacking it somewhere sensible, like <code>C:\src\flutter</code>
+      on Windows or <code>~/development/flutter</code> on macOS/Linux.
+    </p>
+
+    <div class="callout warning">
+      <p>
+        <strong>Don't skip this bit:</strong> you need to add the Flutter <code>bin</code> folder
+        to your system's <strong>PATH</strong>, so your computer knows where to find the
+        <code>flutter</code> command from any terminal window. The install guide above walks
+        through exactly how to do this for your OS.
+      </p>
+    </div>
+
+    <div class="screenshot-placeholder">
+      [Insert screenshot of the Flutter SDK folder location / PATH setup here]
+    </div>
+
+    <h2>4. Run Flutter Doctor</h2>
+    <p>
+      Flutter ships with a built-in health check called <code>flutter doctor</code>. Open a
+      terminal (Command Prompt, PowerShell, or Terminal) and type:
+    </p>
+    <pre><code>flutter doctor</code></pre>
+    <p>
+      This scans your system and tells you exactly what's missing — a bit like a mechanic
+      running diagnostics on a car before a road trip. Don't worry if you see a few red crosses
+      the first time; it usually points you straight at what to fix (like accepting Android
+      licenses, which it'll also give you the exact command for).
+    </p>
+
+    <div class="screenshot-placeholder">
+      [Insert screenshot of a mostly-green 'flutter doctor' output here]
+    </div>
+
+    <h2>5. Install the Flutter and Dart Plugins</h2>
+    <p>
+      Back in Android Studio, you need two plugins so it understands Dart and Flutter code:
+    </p>
+    <ol>
+      <li>Go to <strong>Settings/Preferences &gt; Plugins</strong>.</li>
+      <li>Search for <strong>"Flutter"</strong> and click install. This automatically pulls in the Dart plugin too.</li>
+      <li>Restart Android Studio when prompted.</li>
+    </ol>
+
+    <div class="screenshot-placeholder">
+      [Insert screenshot of the Plugins search showing the Flutter plugin here]
+    </div>
+
+    <h2>6. Create Your First Project</h2>
+    <p>
+      From the Android Studio Welcome screen, choose <strong>New Flutter Project</strong>, point
+      it at your Flutter SDK folder if asked, give your project a name (lowercase, underscores
+      instead of spaces — e.g. <code>side_scroller_game</code>), and let it generate the starter
+      files.
+    </p>
+
+    <div class="screenshot-placeholder">
+      [Insert screenshot of the Android Studio 'New Project' window here]
+    </div>
+
+    <h2>7. Tour the Project Structure</h2>
+    <p>
+      Android Studio just generated a whole pile of folders. Most of them, you can ignore for
+      months. Here's what actually matters right now:
+    </p>
+
+    <div class="callout analogy">
+      <p>
+        <strong>Analogy:</strong> think of your project like a house. <code>lib/</code> is the
+        living room — it's where you'll spend basically all your time. <code>android/</code> and
+        <code>ios/</code> are the foundations and plumbing — necessary, but you almost never need
+        to open them up. <code>pubspec.yaml</code> is the house's official paperwork: what it's
+        called, what's inside it, and what it depends on.
+      </p>
+    </div>
+
+    <ul>
+      <li><code>lib/</code> — where all your Dart code lives. <code>lib/main.dart</code> is the front door: the first file that runs.</li>
+      <li><code>android/</code> and <code>ios/</code> — native platform-specific configuration. You'll rarely touch these in this course.</li>
+      <li><code>test/</code> — where automated tests live. We won't dwell on this, but it's good to know it's there.</li>
+      <li><code>pubspec.yaml</code> — your project's ID card and shopping list, covered next.</li>
+      <li><code>pubspec.lock</code> — an auto-generated file that records the <em>exact</em> versions of everything installed. You won't edit this by hand.</li>
+    </ul>
+
+    <h2>8. Understanding pubspec.yaml</h2>
+    <p>
+      Open <code>pubspec.yaml</code> in your new project. It'll look something like this:
+    </p>
+
+    <pre><code>name: side_scroller_game
+description: "A side-scrolling game built in Flutter."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true</code></pre>
+
+    <div class="callout analogy">
+      <p>
+        <strong>Analogy:</strong> think of <code>pubspec.yaml</code> as a recipe card. The
+        <code>name</code> and <code>description</code> are the dish's title. The
+        <code>dependencies</code> section is your ingredients list — every external package
+        (pre-written code someone else built, like an image loader or an audio player) that your
+        app needs to work. Later in this series, when we add things like image or audio
+        packages, this is the file we'll be editing.
+      </p>
+    </div>
+
+    <h2>9. Try It Yourself: Your First Live Code</h2>
+    <p>
+      For the rest of this course, we're actually going to write and run our code in
+      <strong>DartPad</strong> — a version of Flutter that runs entirely in your browser, no
+      install required. It's perfect for quick experiments and for following along on any
+      computer.
+    </p>
+    <p>
+      This might seem strange after everything you just installed! But it's deliberate: knowing
+      what's happening on your own machine (what you just did above) means you'll actually
+      understand what DartPad is doing behind the scenes for you.
+    </p>
+    <p>
+      Here's a tiny Flutter app. Hit the <strong>Run</strong> button inside the embed below and
+      watch it render live.
+    </p>
+
+    <span class="file-note new">New File</span>
+    <div class="dartpad-embed">
+      <iframe
+        src="https://dartpad.dev/embed-flutter.html?id=&theme=dark&split=60"
+        title="Module 1 DartPad: Hello Flutter"
+        loading="lazy">
+      </iframe>
+    </div>
+
+    <div class="callout warning">
+      <p>
+        <strong>Setup note (for the course author):</strong> paste the contents of the
+        "Full main.dart for This Module" code block below into a new
+        <a href="https://gist.github.com" target="_blank" rel="noopener">GitHub Gist</a>, then
+        replace the empty <code>id=</code> parameter in the iframe above with that Gist's ID.
+      </p>
+    </div>
+
+    <p>
+      Notice what's happening: <code>runApp()</code> is the very first line of Dart that
+      executes — it's the "front door" moment we talked about in <code>lib/main.dart</code>. Everything else
+      is just widgets, stacked inside each other like nested boxes, describing what should appear
+      on screen. We'll pull this apart properly in Module 2.
+    </p>
+
+    <h2>Recap</h2>
+    <ul class="checklist">
+      <li>Installed Android Studio and the Flutter SDK</li>
+      <li>Ran <code>flutter doctor</code> to confirm everything's working</li>
+      <li>Installed the Flutter/Dart plugins and created a starter project</li>
+      <li>Toured the project structure — especially <code>lib/</code> and <code>pubspec.yaml</code></li>
+      <li>Ran your first live Flutter code in DartPad</li>
+    </ul>
+
+    <p>
+      Next up in <strong>Module 2: The Basics</strong>, we'll dig into what <code>runApp()</code>
+      is really doing, the difference between Stateless and Stateful widgets, and start laying
+      out a real screen.
+    </p>
+
+    <h2>Full main.dart for This Module</h2>
+    <pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Hello Flutter',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
+      ),
+      home: const Scaffold(
+        body: Center(
+          child: Text(
+            'Hello, Game Dev!',
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+    );
+  }
+}
+</code></pre>
+
+    <nav class="module-nav">
+      <a href="../index.html">&larr; Back to Roadmap</a>
+      <a href="module-2.html">Module 2: The Basics &rarr;</a>
+    </nav>
+  </main>
+</body>
+</html>
