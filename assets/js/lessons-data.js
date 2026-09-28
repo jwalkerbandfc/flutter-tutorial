@@ -3,7 +3,16 @@ window.FlutterTutorial = window.FlutterTutorial || {};
 window.FlutterTutorial.GITHUB = {
   owner: 'jwalkerbandfc',
   repo: 'flutter-tutorial',
-  ref: 'main',
+  // Pinned to a commit SHA rather than 'main'. DartPad's gh_ref embed is
+  // fetched through a CDN that caches per (owner, repo, ref, path) — with
+  // a branch name as ref, that cache goes stale as soon as main moves,
+  // and there is no way to force-purge it. A commit SHA is immutable, so
+  // the same URL can be cached forever without ever serving old content.
+  // Update this to the new HEAD commit SHA whenever snippets/ changes land
+  // on main (a short branch-name-pointing window between merge and this
+  // update is expected and harmless — it just means the panel briefly
+  // serves the previous commit's snippets until this is bumped).
+  ref: '124168274f0c8fc642a3b5982ddec2d16ab70b26',
 };
 
 window.FlutterTutorial.LESSONS = [

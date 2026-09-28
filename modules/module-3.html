@@ -94,29 +94,12 @@
             <h3>Example 1: Extracting a GameSession Class</h3>
             <p>
               Let's pull the score and lives logic out of <code>_MenuScreenState</code> and into its own
-              class, <code>GameSession</code>. It keeps <code>_score</code> and <code>_lives</code>
-              private, and only exposes them through <strong>getters</strong> (read-only access) and
-              methods like <code>addPoint()</code> and <code>loseLife()</code> — the vending machine
-              buttons.
+              class. Here's the whole thing — a plain Dart class, no Flutter imports needed, keeping
+              <code>_score</code> and <code>_lives</code> private and only exposing them through
+              <strong>getters</strong> (read-only access) and methods like <code>addPoint()</code> and
+              <code>loseLife()</code> — the vending machine buttons:
             </p>
-
-            <div class="example-block">
-              <div class="example-toolbar">
-                <span class="file-note replace">Replaces the entire file</span>
-                <button
-                  class="run-in-panel-btn"
-                  type="button"
-                  data-gh-path="snippets/module-3-example-1.dart"
-                  data-label="Module 3 Example 1: GameSession class"
-                >&#9654; Run in DartPad panel</button>
-              </div>
-              <pre><code>import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const GameMenuApp());
-}
-
-/// Holds the game's data and rules — no widgets, no UI, just logic.
+            <pre><code>/// Holds the game's data and rules — no widgets, no UI, just logic.
 class GameSession {
   int _score = 0;
   int _lives = 3;
@@ -134,84 +117,26 @@ class GameSession {
       _lives--;
     }
   }
-}
-
-class GameMenuApp extends StatelessWidget {
-  const GameMenuApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Game Menu',
-      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.indigo),
-      home: const MenuScreen(),
-    );
-  }
-}
-
-class MenuScreen extends StatefulWidget {
-  const MenuScreen({super.key});
-
-  @override
-  State<MenuScreen> createState() => _MenuScreenState();
-}
-
-class _MenuScreenState extends State<MenuScreen> {
+}</code></pre>
+            <p>
+              Now update <code>_MenuScreenState</code> to hold one of these instead of a raw
+              <code>int</code>, and delegate to it:
+            </p>
+            <pre><code>class _MenuScreenState extends State<MenuScreen> {
   final GameSession _session = GameSession();
 
   void _addPoint() {
     setState(() {
       _session.addPoint();
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sky Runner')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text(
-              'Welcome, Player!',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.indigo.shade50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.favorite, color: Colors.red),
-                  const SizedBox(width: 8),
-                  Text('Lives: ${_session.lives}', style: const TextStyle(fontSize: 18)),
-                  const SizedBox(width: 24),
-                  const Icon(Icons.star, color: Colors.amber),
-                  const SizedBox(width: 8),
-                  Text('Score: ${_session.score}', style: const TextStyle(fontSize: 18)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _addPoint,
-              child: const Text('Tap to score a point!'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}</code></pre>
-            </div>
-
+  }</code></pre>
+            <p>
+              And wherever <code>build()</code> used to read <code>_score</code> directly, it now reads
+              <code>_session.score</code> and <code>_session.lives</code> instead:
+            </p>
+            <pre><code>                  Text('Lives: ${_session.lives}', style: const TextStyle(fontSize: 18)),
+                  // ...
+                  Text('Score: ${_session.score}', style: const TextStyle(fontSize: 18)),</code></pre>
             <p>
               Notice the widget got <em>simpler</em>, not more complicated. <code>_MenuScreenState</code>
               no longer knows or cares how scoring works — it just calls
@@ -219,6 +144,18 @@ class _MenuScreenState extends State<MenuScreen> {
               <code>GameSession</code>, completely separate from anything Flutter-related. You could copy
               that class into a totally different app and it would still work.
             </p>
+
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note replace">Replaces the entire file</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-3-example-1.dart"
+                  data-label="Module 3 Example 1: GameSession class"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+            </div>
 
             <h2>4. Multi-Page Navigation: A Stack of Index Cards</h2>
             <p>
@@ -249,136 +186,11 @@ class _MenuScreenState extends State<MenuScreen> {
 
             <h3>Example 2: Adding a Game Screen</h3>
             <p>
-              Let's add a "Play" button to the menu that pushes a new <code>GameScreen</code>. We'll hand
-              it our existing <code>GameSession</code> object — proof that separating logic from UI pays
-              off, since the same session object can now be shared between two completely different
-              screens.
+              First, the new screen itself — it takes a <code>GameSession</code> in its constructor and
+              just displays the current score. Nothing new here except that a
+              <code>StatelessWidget</code> can take constructor arguments like any other class:
             </p>
-
-            <div class="example-block">
-              <div class="example-toolbar">
-                <span class="file-note new">Adds to Example 1 — new GameScreen class, plus a Play button</span>
-                <button
-                  class="run-in-panel-btn"
-                  type="button"
-                  data-gh-path="snippets/module-3-example-2.dart"
-                  data-label="Module 3 Example 2: Multi-page navigation"
-                >&#9654; Run in DartPad panel</button>
-              </div>
-              <pre><code>import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const GameMenuApp());
-}
-
-/// Holds the game's data and rules — no widgets, no UI, just logic.
-class GameSession {
-  int _score = 0;
-  int _lives = 3;
-
-  int get score => _score;
-  int get lives => _lives;
-  bool get isGameOver => _lives <= 0;
-
-  void addPoint() {
-    _score++;
-  }
-
-  void loseLife() {
-    if (_lives > 0) {
-      _lives--;
-    }
-  }
-}
-
-class GameMenuApp extends StatelessWidget {
-  const GameMenuApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Game Menu',
-      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.indigo),
-      home: const MenuScreen(),
-    );
-  }
-}
-
-class MenuScreen extends StatefulWidget {
-  const MenuScreen({super.key});
-
-  @override
-  State<MenuScreen> createState() => _MenuScreenState();
-}
-
-class _MenuScreenState extends State<MenuScreen> {
-  final GameSession _session = GameSession();
-
-  void _addPoint() {
-    setState(() {
-      _session.addPoint();
-    });
-  }
-
-  void _openGameScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => GameScreen(session: _session)),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sky Runner')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text(
-              'Welcome, Player!',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.indigo.shade50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.favorite, color: Colors.red),
-                  const SizedBox(width: 8),
-                  Text('Lives: ${_session.lives}', style: const TextStyle(fontSize: 18)),
-                  const SizedBox(width: 24),
-                  const Icon(Icons.star, color: Colors.amber),
-                  const SizedBox(width: 8),
-                  Text('Score: ${_session.score}', style: const TextStyle(fontSize: 18)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _addPoint,
-              child: const Text('Tap to score a point!'),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: _openGameScreen,
-              child: const Text('Play'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class GameScreen extends StatelessWidget {
+            <pre><code>class GameScreen extends StatelessWidget {
   final GameSession session;
 
   const GameScreen({super.key, required this.session});
@@ -403,17 +215,42 @@ class GameScreen extends StatelessWidget {
     );
   }
 }</code></pre>
-            </div>
-
             <p>
-              The key additions are: a new <code>GameScreen</code> widget that takes a
-              <code>GameSession</code> in its constructor and displays its current score; a "Play"
-              <code>ElevatedButton</code> on <code>MenuScreen</code> that calls
-              <code>Navigator.push()</code>, passing the existing <code>_session</code> along; and
-              because <code>GameScreen</code> is wrapped by <code>MaterialPageRoute</code> and pushed
+              Next, add a method to <code>_MenuScreenState</code> that pushes it, handing over the
+              existing <code>_session</code> object — proof that separating logic from UI pays off,
+              since the same session can now be shared between two completely different screens:
+            </p>
+            <pre><code>  void _openGameScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => GameScreen(session: _session)),
+    );
+  }</code></pre>
+            <p>
+              Finally, add a "Play" button to <code>build()</code> that calls it:
+            </p>
+            <pre><code>            const SizedBox(height: 16),
+            OutlinedButton(
+              onPressed: _openGameScreen,
+              child: const Text('Play'),
+            ),</code></pre>
+            <p>
+              Because <code>GameScreen</code> is wrapped by <code>MaterialPageRoute</code> and pushed
               onto a <code>Scaffold</code>, Flutter automatically gives it a back arrow in its app bar —
               no extra code needed.
             </p>
+
+            <div class="example-block">
+              <div class="example-toolbar">
+                <span class="file-note new">Adds to Example 1 — new GameScreen class, plus a Play button</span>
+                <button
+                  class="run-in-panel-btn"
+                  type="button"
+                  data-gh-path="snippets/module-3-example-2.dart"
+                  data-label="Module 3 Example 2: Multi-page navigation"
+                >&#9654; Run in DartPad panel</button>
+              </div>
+            </div>
 
             <h2>Recap</h2>
             <ul class="checklist">
